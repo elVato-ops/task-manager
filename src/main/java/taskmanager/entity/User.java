@@ -1,0 +1,48 @@
+package taskmanager.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
+import taskmanager.exception.ValidationException;
+
+import static taskmanager.exception.ErrorCode.USER_DATA_INVALID;
+
+@Entity
+@Table(name = "users")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String password;
+
+    public User(String name, String password)
+    {
+        if (!StringUtils.hasText(name))
+        {
+            validationException("User name must not be empty");
+        }
+
+        if (!StringUtils.hasText(password))
+        {
+            validationException("Password must not be empty");
+        }
+
+        this.name = name;
+        this.password = password;
+    }
+
+    public void validationException(String message)
+    {
+        throw new ValidationException(message, USER_DATA_INVALID);
+    }
+}
