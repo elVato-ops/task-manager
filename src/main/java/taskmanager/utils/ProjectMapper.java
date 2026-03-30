@@ -2,7 +2,6 @@ package taskmanager.utils;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
