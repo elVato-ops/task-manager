@@ -6,14 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import taskmanager.exception.NotFoundException;
 import taskmanager.project.Project;
 import taskmanager.project.ProjectRepository;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.task.filter.TaskFilter;
-import taskmanager.task.specification.TaskSpecifications;
+import taskmanager.task.specification.TaskSpecification;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
 import taskmanager.utils.TaskMapper;
@@ -52,30 +51,10 @@ public class TaskService
 
     public Page<TaskResponse> findTasks(TaskFilter filter, Pageable pageable)
     {
-        Specification<Task> spec = Specification.allOf();
-
-        if (StringUtils.hasText(filter.getName()))
-        {
-            spec.and(TaskSpecifications.hasName(filter.getName()));
-        }
-
-        if (filter.getStatus() != null)
-        {
-            spec.and(TaskSpecifications.hasStatus(filter.getStatus()));
-        }
-
-        if (filter.getAssigneeId() != null)
-        {
-            spec.and(TaskSpecifications.isForAssignee(filter.getAssigneeId()));
-        }
-
-        if (filter.getProjectId() != null)
-        {
-            spec.and(TaskSpecifications.isForProject(filter.getProjectId()));
-        }
+        Specification<Task> specification = TaskSpecification.withFilter(filter);
 
         return taskRepository
-                .findAll(spec, pageable)
+                .findAll(specification, pageable)
                 .map(taskMapper::toResponse);
     }
 

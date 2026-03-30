@@ -8,8 +8,8 @@ import taskmanager.task.TaskStatus;
 @Getter
 public class TaskFilter
 {
-    private String name;
-    private TaskStatus status;
-    private Long projectId;
-    private Long assigneeId;
+    private final String name;
+    private final TaskStatus status;
+    private final Long projectId;
+    private final Long assigneeId;
 }

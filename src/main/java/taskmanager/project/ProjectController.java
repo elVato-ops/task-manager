@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import taskmanager.PageResponse;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
+import taskmanager.project.filter.ProjectFilter;
 import taskmanager.task.TaskService;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
@@ -25,7 +26,8 @@ public class ProjectController
     private final TaskService taskService;
 
     @PostMapping
-    public ResponseEntity<ProjectResponse> create(@Valid @RequestBody CreateProjectRequest request)
+    public ResponseEntity<ProjectResponse> create(
+            @Valid @RequestBody CreateProjectRequest request)
     {
         ProjectResponse project = projectService.createProject(request);
 
@@ -34,15 +36,31 @@ public class ProjectController
                 .body(project);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<ProjectResponse> getById(@PathVariable @Positive Long id)
+    @GetMapping
+    public Page<ProjectResponse> getAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) @Positive Long ownerId,
+            Pageable pageable)
     {
-        return ResponseEntity
-                .ok(projectService.getById(id));
+        ProjectFilter filter = ProjectFilter.builder()
+                .name(name)
+                .ownerId(ownerId)
+                .build();
+
+        return projectService.getAll(filter, pageable);
+    }
+
+    @GetMapping("{id}")
+    public ProjectResponse getById(
+            @PathVariable @Positive Long id)
+    {
+        return projectService.getById(id);
     }
 
     @PostMapping("{id}/tasks")
-    public ResponseEntity<TaskResponse> createTask(@PathVariable @Positive Long id, @Valid @RequestBody CreateTaskRequest request)
+    public ResponseEntity<TaskResponse> createTask(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody CreateTaskRequest request)
     {
         TaskResponse task = taskService.createTask(request, id);
 
@@ -52,10 +70,11 @@ public class ProjectController
     }
 
     @GetMapping("{id}/tasks")
-    public PageResponse<TaskResponse> getTasks(@PathVariable @Positive Long id, Pageable pageable)
+    public PageResponse<TaskResponse> getTasks(
+            @PathVariable @Positive Long id,
+            Pageable pageable)
     {
         Page<TaskResponse> page = taskService.findTasks(id, pageable);
-
         return new PageResponse<>(page);
     }
 }

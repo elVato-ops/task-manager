@@ -2,6 +2,7 @@ package taskmanager.user;
 
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +32,9 @@ public class UserController
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id)
+    public UserResponse getUserById(@PathVariable @Positive Long id)
     {
-        return ResponseEntity
-                .ok(userService.getUser(id));
+        return userService.getUser(id);
     }
 
     @GetMapping

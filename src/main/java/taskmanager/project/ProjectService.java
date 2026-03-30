@@ -1,14 +1,18 @@
 package taskmanager.project;
 
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import taskmanager.exception.NotFoundException;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
-import taskmanager.user.UserRepository;
+import taskmanager.project.filter.ProjectFilter;
+import taskmanager.project.specification.ProjectSpecification;
 import taskmanager.user.User;
+import taskmanager.user.UserRepository;
 import taskmanager.utils.ProjectMapper;
 
 import static taskmanager.exception.ResourceType.PROJECT;
@@ -23,7 +27,7 @@ public class ProjectService
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
 
-    public ProjectResponse createProject(@Valid CreateProjectRequest request)
+    public ProjectResponse createProject(CreateProjectRequest request)
     {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new NotFoundException(request.userId(), USER));
@@ -39,5 +43,14 @@ public class ProjectService
                 projectRepository
                         .findById(id)
                         .orElseThrow(() -> new NotFoundException(id, PROJECT)));
+    }
+
+    public Page<ProjectResponse> getAll(ProjectFilter filter, Pageable pageable)
+    {
+        Specification<Project> specification = ProjectSpecification.withFilter(filter);
+
+        return projectRepository
+                .findAll(specification, pageable)
+                .map(projectMapper::toResponse);
     }
 }
