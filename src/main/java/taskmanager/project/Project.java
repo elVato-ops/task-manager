@@ -31,19 +31,19 @@ public class Project
     {
         if (!StringUtils.hasText(name))
         {
-            validationException("Project name must not be empty");
+            throwValidation("Project name must not be empty");
         }
 
         if (owner == null)
         {
-            validationException("Project owner must not be null");
+            throwValidation("Project owner must not be null");
         }
 
         this.name = name;
         this.owner = owner;
     }
 
-    public void validationException(String message)
+    public void throwValidation(String message)
     {
         throw new ValidationException(message, PROJECT);
     }

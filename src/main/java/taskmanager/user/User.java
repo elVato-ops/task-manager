@@ -29,19 +29,19 @@ public class User
     {
         if (!StringUtils.hasText(name))
         {
-            validationException("User name must not be empty");
+            throwValidation("User name must not be empty");
         }
 
         if (!StringUtils.hasText(password))
         {
-            validationException("Password must not be empty");
+            throwValidation("Password must not be empty");
         }
 
         this.name = name;
         this.password = password;
     }
 
-    public void validationException(String message)
+    public void throwValidation(String message)
     {
         throw new ValidationException(message, USER);
     }

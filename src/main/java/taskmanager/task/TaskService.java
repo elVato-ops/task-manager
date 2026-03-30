@@ -18,8 +18,8 @@ import static taskmanager.exception.ResourceType.PROJECT;
 import static taskmanager.exception.ResourceType.USER;
 
 @Service
-@Transactional
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class TaskService
 {
     private final TaskRepository taskRepository;

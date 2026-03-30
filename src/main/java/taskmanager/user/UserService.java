@@ -14,7 +14,7 @@ import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService
 {
     private final UserRepository userRepository;
@@ -26,12 +26,12 @@ public class UserService
         return mapper.toResponse(user);
     }
 
-    public List<UserResponse> fetchUsers()
+    public List<UserResponse> getUsers()
     {
         return mapper.toResponse(userRepository.findAll());
     }
 
-    public UserResponse fetchUser(Long id)
+    public UserResponse getUser(Long id)
     {
         return mapper.toResponse(
                 userRepository

@@ -40,17 +40,17 @@ public class Task
     {
         if (!StringUtils.hasText(name))
         {
-            validationException("Task name must not be empty");
+            throwValidation("Task name must not be empty");
         }
 
         if (status == null)
         {
-            validationException("Task status must not be null");
+            throwValidation("Task status must not be null");
         }
 
         if (project == null)
         {
-            validationException("Task project must not be null");
+            throwValidation("Task project must not be null");
         }
 
         this.name = name;
@@ -59,7 +59,7 @@ public class Task
         this.assignee = assignee;
     }
 
-    public void validationException(String message)
+    public void throwValidation(String message)
     {
         throw new ValidationException(message, TASK);
     }

@@ -32,13 +32,13 @@ public class UserController
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id)
     {
         return ResponseEntity
-                .ok(userService.fetchUser(id));
+                .ok(userService.getUser(id));
     }
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> getUsers()
     {
         return ResponseEntity
-                .ok(userService.fetchUsers());
+                .ok(userService.getUsers());
     }
 }

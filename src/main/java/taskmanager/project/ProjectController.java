@@ -31,15 +31,15 @@ public class ProjectController
                 .body(project);
     }
 
-    @GetMapping("/projects/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<ProjectResponse> getById(@PathVariable @Positive Long id)
     {
         return ResponseEntity
                 .ok(projectService.getById(id));
     }
 
-    @PostMapping("/projects/{projectId}/tasks")
-    public ResponseEntity<TaskResponse> createTask(@PathVariable @Positive Long projectId, @RequestBody CreateTaskRequest request)
+    @PostMapping("{projectId}/tasks")
+    public ResponseEntity<TaskResponse> createTask(@PathVariable @Positive Long projectId, @Valid @RequestBody CreateTaskRequest request)
     {
         TaskResponse task = taskService.createTask(request, projectId);
 
