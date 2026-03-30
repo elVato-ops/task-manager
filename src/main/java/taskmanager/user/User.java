@@ -1,4 +1,4 @@
-package taskmanager.entity;
+package taskmanager.user;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import taskmanager.exception.ValidationException;
 
-import static taskmanager.exception.ErrorCode.PROJECT_DATA_INVALID;
+import static taskmanager.exception.ResourceType.USER;
 
 @Entity
-@Table(name = "projects")
+@Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Project
+public class User
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,28 +22,27 @@ public class Project
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User owner;
+    @Column(nullable = false)
+    private String password;
 
-    public Project(String name, User owner)
+    public User(String name, String password)
     {
         if (!StringUtils.hasText(name))
         {
-            validationException("Project name must not be empty");
+            validationException("User name must not be empty");
         }
 
-        if (owner == null)
+        if (!StringUtils.hasText(password))
         {
-            validationException("Project owner must not be null");
+            validationException("Password must not be empty");
         }
 
         this.name = name;
-        this.owner = owner;
+        this.password = password;
     }
 
     public void validationException(String message)
     {
-        throw new ValidationException(message, PROJECT_DATA_INVALID);
+        throw new ValidationException(message, USER);
     }
 }

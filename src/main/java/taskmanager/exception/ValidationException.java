@@ -1,12 +1,16 @@
 package taskmanager.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public class ValidationException extends RuntimeException
 {
-    private final String message;
-    private final ErrorCode errorCode;
+    private final ResourceType resource;
+
+    public ValidationException(String message, ResourceType resource)
+    {
+        super(message);
+
+        this.resource = resource;
+    }
 }

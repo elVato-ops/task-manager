@@ -1,4 +1,4 @@
-package taskmanager.entity;
+package taskmanager.task;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,8 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import taskmanager.exception.ValidationException;
+import taskmanager.project.Project;
+import taskmanager.user.User;
 
-import static taskmanager.exception.ErrorCode.TASK_DATA_INVALID;
+import static taskmanager.exception.ResourceType.TASK;
 
 @Entity
 @Table(name = "tasks")
@@ -31,7 +33,7 @@ public class Task
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User assignee;
 
     public Task(String name, TaskStatus status, Project project, User assignee)
@@ -51,11 +53,6 @@ public class Task
             validationException("Task project must not be null");
         }
 
-        if (assignee == null)
-        {
-            validationException("Task assignee must not be null");
-        }
-
         this.name = name;
         this.status = status;
         this.project = project;
@@ -64,6 +61,6 @@ public class Task
 
     public void validationException(String message)
     {
-        throw new ValidationException(message, TASK_DATA_INVALID);
+        throw new ValidationException(message, TASK);
     }
 }

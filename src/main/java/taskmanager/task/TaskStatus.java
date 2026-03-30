@@ -1,4 +1,4 @@
-package taskmanager.entity;
+package taskmanager.task;
 
 public enum TaskStatus
 {
