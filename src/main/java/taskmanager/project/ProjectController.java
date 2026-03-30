@@ -3,8 +3,11 @@ package taskmanager.project;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import taskmanager.PageResponse;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.TaskService;
@@ -38,13 +41,21 @@ public class ProjectController
                 .ok(projectService.getById(id));
     }
 
-    @PostMapping("{projectId}/tasks")
-    public ResponseEntity<TaskResponse> createTask(@PathVariable @Positive Long projectId, @Valid @RequestBody CreateTaskRequest request)
+    @PostMapping("{id}/tasks")
+    public ResponseEntity<TaskResponse> createTask(@PathVariable @Positive Long id, @Valid @RequestBody CreateTaskRequest request)
     {
-        TaskResponse task = taskService.createTask(request, projectId);
+        TaskResponse task = taskService.createTask(request, id);
 
         return ResponseEntity
-                .created(URI.create("/projects/" + projectId + "/tasks/" + task.id()))
+                .created(URI.create("/projects/" + id + "/tasks/" + task.id()))
                 .body(task);
+    }
+
+    @GetMapping("{id}/tasks")
+    public PageResponse<TaskResponse> getTasks(@PathVariable @Positive Long id, Pageable pageable)
+    {
+        Page<TaskResponse> page = taskService.findTasks(id, pageable);
+
+        return new PageResponse<>(page);
     }
 }

@@ -1,14 +1,14 @@
 package taskmanager.user;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import taskmanager.exception.NotFoundException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.utils.UserMapper;
-
-import java.util.List;
 
 import static taskmanager.exception.ResourceType.USER;
 
@@ -26,9 +26,12 @@ public class UserService
         return mapper.toResponse(user);
     }
 
-    public List<UserResponse> getUsers()
+    public Page<UserResponse> getUsers(Pageable pageable)
     {
-        return mapper.toResponse(userRepository.findAll());
+        return userRepository
+                .findAll(pageable)
+                .map(mapper::toResponse);
+
     }
 
     public UserResponse getUser(Long id)

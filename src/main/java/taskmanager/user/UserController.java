@@ -3,13 +3,15 @@ package taskmanager.user;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import taskmanager.PageResponse;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -36,9 +38,9 @@ public class UserController
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getUsers()
+    public PageResponse<UserResponse> getUsers(Pageable pageable)
     {
-        return ResponseEntity
-                .ok(userService.getUsers());
+        Page<UserResponse> users = userService.getUsers(pageable);
+        return new PageResponse<>(users);
     }
 }

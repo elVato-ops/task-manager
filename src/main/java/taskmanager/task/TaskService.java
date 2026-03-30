@@ -1,6 +1,8 @@
 package taskmanager.task;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import taskmanager.exception.NotFoundException;
@@ -11,8 +13,6 @@ import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
 import taskmanager.utils.TaskMapper;
-
-import java.util.List;
 
 import static taskmanager.exception.ResourceType.PROJECT;
 import static taskmanager.exception.ResourceType.USER;
@@ -46,10 +46,21 @@ public class TaskService
                         .save(taskMapper.toEntity(request, project, user)));
     }
 
-    public List<TaskResponse> findAll()
+    public Page<TaskResponse> findAll(Pageable pageable)
     {
-        return taskMapper.toResponse(
-                taskRepository
-                        .findAll());
+        return taskRepository
+                .findAll(pageable)
+                .map(taskMapper::toResponse);
+    }
+
+    public Page<TaskResponse> findTasks(Long id, Pageable pageable)
+    {
+        if (!projectRepository.existsById(id))
+        {
+            throw new NotFoundException(id, PROJECT);
+        }
+
+        return taskRepository.findByProjectId(id, pageable)
+                        .map(taskMapper::toResponse);
     }
 }
