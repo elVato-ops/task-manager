@@ -2,7 +2,7 @@ package taskmanager.project.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
-import specification.SpecificationBuilder;
+import taskmanager.specification.SpecificationBuilder;
 import taskmanager.project.Project;
 import taskmanager.project.filter.ProjectFilter;
 

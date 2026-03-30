@@ -1,4 +1,4 @@
-package specification;
+package taskmanager.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 

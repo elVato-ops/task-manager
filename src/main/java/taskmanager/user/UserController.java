@@ -4,15 +4,16 @@ package taskmanager.user;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import taskmanager.PageResponse;
+import taskmanager.response.PageResponse;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
+import taskmanager.user.filter.UserFilter;
 
 import java.net.URI;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/users")
@@ -22,7 +23,8 @@ public class UserController
     private final UserService userService;
 
     @PostMapping()
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request)
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody CreateUserRequest request)
     {
         UserResponse user = userService.createUser(request);
 
@@ -32,15 +34,23 @@ public class UserController
     }
 
     @GetMapping("/{id}")
-    public UserResponse getUserById(@PathVariable @Positive Long id)
+    public UserResponse getUserById(
+            @PathVariable @Positive Long id)
     {
         return userService.getUser(id);
     }
 
     @GetMapping
-    public PageResponse<UserResponse> getUsers(Pageable pageable)
+    public PageResponse<UserResponse> getUsers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Instant fromCreationDate,
+            Pageable pageable)
     {
-        Page<UserResponse> users = userService.getUsers(pageable);
-        return new PageResponse<>(users);
+        UserFilter filter = UserFilter.builder()
+                .name(name)
+                .fromCreationDate(fromCreationDate)
+                .build();
+
+        return new PageResponse<>(userService.getUsers(filter, pageable));
     }
 }

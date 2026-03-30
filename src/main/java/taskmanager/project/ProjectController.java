@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import taskmanager.PageResponse;
+import taskmanager.response.PageResponse;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;

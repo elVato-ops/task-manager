@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import taskmanager.exception.ValidationException;
 
+import java.time.Instant;
+
 import static taskmanager.exception.ResourceType.USER;
 
 @Entity
@@ -25,6 +27,9 @@ public class User
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private Instant creationDate;
+
     public User(String name, String password)
     {
         if (!StringUtils.hasText(name))
@@ -39,6 +44,7 @@ public class User
 
         this.name = name;
         this.password = password;
+        this.creationDate = Instant.now();
     }
 
     public void throwValidation(String message)
