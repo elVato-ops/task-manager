@@ -22,7 +22,6 @@ import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
 public class TaskService
 {
     private final TaskRepository taskRepository;
@@ -30,6 +29,7 @@ public class TaskService
     private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
+    @Transactional
     public TaskResponse createTask(CreateTaskRequest request, Long projectId)
     {
         Project project = projectRepository
@@ -49,6 +49,7 @@ public class TaskService
                         .save(taskMapper.toEntity(request, project, user)));
     }
 
+    @Transactional(readOnly = true)
     public Page<TaskResponse> findTasks(TaskFilter filter, Pageable pageable)
     {
         Specification<Task> specification = TaskSpecification.withFilter(filter);
@@ -58,6 +59,7 @@ public class TaskService
                 .map(taskMapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public Page<TaskResponse> findTasks(Long id, Pageable pageable)
     {
         if (!projectRepository.existsById(id))

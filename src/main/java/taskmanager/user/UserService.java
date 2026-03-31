@@ -17,18 +17,20 @@ import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class UserService
 {
     private final UserRepository userRepository;
     private final UserMapper mapper;
 
+    @Transactional
     public UserResponse createUser(CreateUserRequest request)
     {
         User user = userRepository.save(mapper.toEntity(request));
         return mapper.toResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> getUsers(UserFilter filter, Pageable pageable)
     {
         Specification<User> specification = UserSpecification.withFilter(filter);
@@ -38,6 +40,7 @@ public class UserService
                 .map(mapper::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getUser(Long id)
     {
         return mapper.toResponse(

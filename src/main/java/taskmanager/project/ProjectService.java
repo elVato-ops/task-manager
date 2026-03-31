@@ -20,13 +20,14 @@ import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ProjectService
 {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
 
+    @Transactional
     public ProjectResponse createProject(CreateProjectRequest request)
     {
         User user = userRepository.findById(request.userId())
@@ -37,6 +38,7 @@ public class ProjectService
                         .save(projectMapper.toEntity(request, user)));
     }
 
+    @Transactional(readOnly = true)
     public ProjectResponse getById(Long id)
     {
         return projectMapper.toResponse(
@@ -45,6 +47,7 @@ public class ProjectService
                         .orElseThrow(() -> new NotFoundException(id, PROJECT)));
     }
 
+    @Transactional(readOnly = true)
     public Page<ProjectResponse> getAll(ProjectFilter filter, Pageable pageable)
     {
         Specification<Project> specification = ProjectSpecification.withFilter(filter);

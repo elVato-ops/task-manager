@@ -26,12 +26,15 @@ public class TaskMapper
 
     public TaskResponse toResponse(Task task)
     {
+        Long assigneeId = task.getAssignee() != null ? task.getAssignee().getId() : null;
+
         return new TaskResponse(
                 task.getId(),
                 task.getName(),
                 task.getStatus(),
                 task.getProject().getId(),
-                task.getAssignee().getId());
+                assigneeId
+                );
     }
 
     public List<TaskResponse> toResponse(List<Task> tasks)

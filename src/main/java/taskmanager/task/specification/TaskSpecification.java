@@ -39,7 +39,7 @@ public class TaskSpecification
     private static Specification<Task> isForAssignee(Long assigneeId)
     {
         return (root, query, cb) ->
-                cb.equal(root.get("user").get("id"), assigneeId);
+                cb.equal(root.get("assignee").get("id"), assigneeId);
     }
 
     private static Specification<Task> isForProject(Long projectId)
