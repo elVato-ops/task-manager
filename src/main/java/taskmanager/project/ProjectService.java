@@ -12,26 +12,23 @@ import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.project.specification.ProjectSpecification;
 import taskmanager.user.User;
-import taskmanager.user.UserRepository;
+import taskmanager.user.UserFinder;
 import taskmanager.utils.ProjectMapper;
 
 import static taskmanager.exception.ResourceType.PROJECT;
-import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @AllArgsConstructor
-@Transactional
 public class ProjectService
 {
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
     private final ProjectMapper projectMapper;
+    private final UserFinder userFinder;
 
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request)
     {
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new NotFoundException(request.userId(), USER));
+        User user = userFinder.getUser(request.userId());
 
         return projectMapper.toResponse(
                 projectRepository

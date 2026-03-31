@@ -9,8 +9,6 @@ import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.User;
 
-import java.util.List;
-
 @Component
 @AllArgsConstructor
 public class TaskMapper
@@ -35,12 +33,5 @@ public class TaskMapper
                 task.getProject().getId(),
                 assigneeId
                 );
-    }
-
-    public List<TaskResponse> toResponse(List<Task> tasks)
-    {
-        return tasks.stream()
-                .map(this::toResponse)
-                .toList();
     }
 }
