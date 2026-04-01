@@ -99,7 +99,7 @@ public class UserServiceTest
     class GetUser
     {
         @Test
-        public void returnsUsers_whenSuccess()
+        public void returnsUser_whenSuccess()
         {
             //GIVEN
             when(userFinder.getUser(USER_ID))

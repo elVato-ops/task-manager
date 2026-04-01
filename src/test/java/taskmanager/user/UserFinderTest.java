@@ -50,7 +50,7 @@ public class UserFinderTest
 
             User user = users.get().toList().get(0);
             assertEquals(user().getId(), user.getId());
-            assertEquals(user().getPassword(), user.getPassword());
+            assertEquals(user().getName(), user.getName());
         }
     }
 
@@ -58,7 +58,7 @@ public class UserFinderTest
     class GetUser
     {
         @Test
-        public void returnsUsers_whenSuccess()
+        public void returnsUser_whenSuccess()
         {
             //GIVEN
             when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user()));

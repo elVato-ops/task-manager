@@ -135,6 +135,30 @@ public class TaskServiceTest
             verifyNoInteractions(userFinder);
             verifyNoInteractions(taskRepository);
         }
+
+        @Test
+        public void throwsNotFoundException_whenUserNotExists()
+        {
+            //GIVEN
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenReturn(project());
+
+            when(userFinder.getUser(USER_ID))
+                    .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
+
+            //WHEN /THEN
+            NotFoundException notFoundException = assertThrows(NotFoundException.class,
+                    () -> taskService.createTask(createTaskRequest(), PROJECT_ID));
+
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
+            verify(userFinder, times(1)).getUser(USER_ID);
+            verifyNoMoreInteractions(userFinder);
+            verifyNoInteractions(taskRepository);
+
+            assertEquals(ResourceType.USER, notFoundException.getResource());
+            assertEquals(USER_ID, notFoundException.getId());
+        }
     }
 
     @Nested

@@ -104,6 +104,24 @@ public class ProjectServiceTest
             assertEquals(project().getName(), response.name());
             assertEquals(project().getOwner().getId(), response.ownerId());
         }
+
+        @Test
+        public void throwsNotFoundException_whenNotExists()
+        {
+            //GIVEN
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+
+            //WHEN /THEN
+            NotFoundException exception = assertThrows(NotFoundException.class,
+                    () -> projectService.getProject(PROJECT_ID));
+
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
+
+            assertEquals(project().getId(), exception.getId());
+            assertEquals(ResourceType.PROJECT, exception.getResource());
+        }
     }
 
     @Nested
