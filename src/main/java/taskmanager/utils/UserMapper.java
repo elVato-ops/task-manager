@@ -7,8 +7,6 @@ import taskmanager.user.User;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 
-import java.util.List;
-
 @Component
 @AllArgsConstructor
 public class UserMapper
@@ -25,12 +23,5 @@ public class UserMapper
         return new UserResponse(
                 user.getId(),
                 user.getName());
-    }
-
-    public List<UserResponse> toResponse(List<User> users)
-    {
-        return users.stream()
-                .map(this::toResponse)
-                .toList();
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.user.User;
+import taskmanager.user.dto.CreateUserRequest;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -45,6 +46,11 @@ public class TestConstants
         return new CreateProjectRequest(PROJECT_NAME, USER_ID);
     }
 
+    public static CreateUserRequest createUserRequest()
+    {
+        return new CreateUserRequest(USER_NAME, PASSWORD);
+    }
+
     @SneakyThrows
     public static User user()
     {
@@ -55,5 +61,10 @@ public class TestConstants
         field.set(user, USER_ID);
 
         return user;
+    }
+
+    public static Page<User> usersPage()
+    {
+        return new PageImpl<>(List.of(user()));
     }
 }
