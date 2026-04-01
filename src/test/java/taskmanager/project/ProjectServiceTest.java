@@ -6,15 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.domain.Specification;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.user.UserFinder;
 import taskmanager.utils.ProjectMapper;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,16 +23,19 @@ import static taskmanager.TestConstants.*;
 public class ProjectServiceTest
 {
     @InjectMocks
-    ProjectService projectService;
+    private ProjectService projectService;
 
     @Mock
-    ProjectRepository projectRepository;
+    private ProjectRepository projectRepository;
 
     @Mock
-    UserFinder userFinder;
+    private ProjectFinder projectFinder;
+
+    @Mock
+    private UserFinder userFinder;
 
     @Spy
-    ProjectMapper projectMapper;
+    private ProjectMapper projectMapper;
 
     @Nested
     class CreateProject
@@ -90,34 +90,19 @@ public class ProjectServiceTest
         public void returnsProject_whenExists()
         {
             //GIVEN
-            when(projectRepository.findById(PROJECT_ID))
-                    .thenReturn(Optional.of(project()));
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenReturn(project());
 
             //WHEN
             ProjectResponse response = projectService.getProject(PROJECT_ID);
 
             //THEN
-            verify(projectRepository, times(1)).findById(PROJECT_ID);
-            verifyNoMoreInteractions(projectRepository);
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
 
             assertEquals(project().getId(), response.id());
             assertEquals(project().getName(), response.name());
             assertEquals(project().getOwner().getId(), response.ownerId());
-        }
-
-        @Test
-        public void throwsNotFoundException_whenNotExists()
-        {
-            //GIVEN
-            when(projectRepository.findById(PROJECT_ID))
-                    .thenReturn(Optional.empty());
-
-            //WHEN /THEN
-            NotFoundException notFoundException =
-                    assertThrows(NotFoundException.class, () -> projectService.getProject(PROJECT_ID));
-
-            assertEquals(ResourceType.PROJECT, notFoundException.getResource());
-            assertEquals(PROJECT_ID, notFoundException.getId());
         }
     }
 
@@ -129,7 +114,7 @@ public class ProjectServiceTest
         {
             //GIVEN
             ProjectFilter filter = ProjectFilter.builder().build();
-            when(projectRepository.findAll(ArgumentMatchers.<Specification<Project>>any(), eq(PAGEABLE)))
+            when(projectFinder.getProjects(ArgumentMatchers.any(), eq(PAGEABLE)))
                     .thenReturn(projectsPage());
 
             //WHEN
@@ -137,9 +122,9 @@ public class ProjectServiceTest
                     .getProjects(filter, PAGEABLE);
 
             //THEN
-            verify(projectRepository, times(1))
-                    .findAll(ArgumentMatchers.<Specification<Project>>any(), eq(PAGEABLE));
-            verifyNoMoreInteractions(projectRepository);
+            verify(projectFinder, times(1))
+                    .getProjects(ArgumentMatchers.any(), eq(PAGEABLE));
+            verifyNoMoreInteractions(projectFinder);
 
             assertEquals(1, response.getTotalElements());
 

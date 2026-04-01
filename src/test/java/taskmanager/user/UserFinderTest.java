@@ -24,10 +24,10 @@ import static taskmanager.TestConstants.*;
 public class UserFinderTest
 {
     @InjectMocks
-    UserFinder userFinder;
+    private UserFinder userFinder;
 
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Nested
     class GetUsers

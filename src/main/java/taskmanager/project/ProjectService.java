@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import taskmanager.exception.NotFoundException;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
@@ -15,13 +14,12 @@ import taskmanager.user.User;
 import taskmanager.user.UserFinder;
 import taskmanager.utils.ProjectMapper;
 
-import static taskmanager.exception.ResourceType.PROJECT;
-
 @Service
 @AllArgsConstructor
 public class ProjectService
 {
     private final ProjectRepository projectRepository;
+    private final ProjectFinder projectFinder;
     private final ProjectMapper projectMapper;
     private final UserFinder userFinder;
 
@@ -39,9 +37,7 @@ public class ProjectService
     public ProjectResponse getProject(Long id)
     {
         return projectMapper.toResponse(
-                projectRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NotFoundException(id, PROJECT)));
+                projectFinder.getProject(id));
     }
 
     @Transactional(readOnly = true)
@@ -49,8 +45,8 @@ public class ProjectService
     {
         Specification<Project> specification = ProjectSpecification.withFilter(filter);
 
-        return projectRepository
-                .findAll(specification, pageable)
+        return projectFinder
+                .getProjects(specification, pageable)
                 .map(projectMapper::toResponse);
     }
 }
