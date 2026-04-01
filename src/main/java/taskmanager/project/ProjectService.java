@@ -36,7 +36,7 @@ public class ProjectService
     }
 
     @Transactional(readOnly = true)
-    public ProjectResponse getById(Long id)
+    public ProjectResponse getProject(Long id)
     {
         return projectMapper.toResponse(
                 projectRepository
@@ -45,7 +45,7 @@ public class ProjectService
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectResponse> getAll(ProjectFilter filter, Pageable pageable)
+    public Page<ProjectResponse> getProjects(ProjectFilter filter, Pageable pageable)
     {
         Specification<Project> specification = ProjectSpecification.withFilter(filter);
 

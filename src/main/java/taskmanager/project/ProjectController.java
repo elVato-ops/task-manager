@@ -47,14 +47,14 @@ public class ProjectController
                 .ownerId(ownerId)
                 .build();
 
-        return projectService.getAll(filter, pageable);
+        return projectService.getProjects(filter, pageable);
     }
 
     @GetMapping("{id}")
     public ProjectResponse getById(
             @PathVariable @Positive Long id)
     {
-        return projectService.getById(id);
+        return projectService.getProject(id);
     }
 
     @PostMapping("{id}/tasks")

@@ -84,7 +84,7 @@ public class ProjectServiceTest
     }
 
     @Nested
-    class GetById
+    class GetProject
     {
         @Test
         public void returnsProject_whenExists()
@@ -94,7 +94,7 @@ public class ProjectServiceTest
                     .thenReturn(Optional.of(project()));
 
             //WHEN
-            ProjectResponse response = projectService.getById(PROJECT_ID);
+            ProjectResponse response = projectService.getProject(PROJECT_ID);
 
             //THEN
             verify(projectRepository, times(1)).findById(PROJECT_ID);
@@ -114,7 +114,7 @@ public class ProjectServiceTest
 
             //WHEN /THEN
             NotFoundException notFoundException =
-                    assertThrows(NotFoundException.class, () -> projectService.getById(PROJECT_ID));
+                    assertThrows(NotFoundException.class, () -> projectService.getProject(PROJECT_ID));
 
             assertEquals(ResourceType.PROJECT, notFoundException.getResource());
             assertEquals(PROJECT_ID, notFoundException.getId());
@@ -122,7 +122,7 @@ public class ProjectServiceTest
     }
 
     @Nested
-    class GetAll
+    class GetProjects
     {
         @Test
         public void returnsFilteredProjects_whenSuccess()
@@ -134,7 +134,7 @@ public class ProjectServiceTest
 
             //WHEN
             Page<ProjectResponse> response = projectService
-                    .getAll(filter, PAGEABLE);
+                    .getProjects(filter, PAGEABLE);
 
             //THEN
             verify(projectRepository, times(1))
