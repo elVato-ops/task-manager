@@ -45,7 +45,7 @@ public class TaskService
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskResponse> findTasks(TaskFilter filter, Pageable pageable)
+    public Page<TaskResponse> getTasks(TaskFilter filter, Pageable pageable)
     {
         Specification<Task> specification = TaskSpecification.withFilter(filter);
 
@@ -55,14 +55,14 @@ public class TaskService
     }
 
     @Transactional(readOnly = true)
-    public Page<TaskResponse> findTasks(Long id, Pageable pageable)
+    public Page<TaskResponse> getTasks(Long projectId, Pageable pageable)
     {
-        if (!projectFinder.existsById(id))
+        if (!projectFinder.existsById(projectId))
         {
-            throw new NotFoundException(id, PROJECT);
+            throw new NotFoundException(projectId, PROJECT);
         }
 
-        return taskRepository.findByProjectId(id, pageable)
+        return taskRepository.findByProjectId(projectId, pageable)
                         .map(taskMapper::toResponse);
     }
 }

@@ -33,6 +33,6 @@ public class TaskController
                 .projectId(projectId)
                 .build();
 
-        return new PageResponse<>(taskService.findTasks(taskFilter, pageable));
+        return new PageResponse<>(taskService.getTasks(taskFilter, pageable));
     }
 }

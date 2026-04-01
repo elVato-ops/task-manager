@@ -7,6 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
+import taskmanager.task.Task;
+import taskmanager.task.TaskStatus;
+import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.user.User;
 import taskmanager.user.dto.CreateUserRequest;
 
@@ -18,9 +21,13 @@ public class TestConstants
     public static final String USER_NAME = "Bobek";
     public static final String PASSWORD = "password";
     public static final String PROJECT_NAME = "Some project";
+    public static final String TASK_NAME = "Some task";
 
     public static final Long USER_ID = 17L;
     public static final Long PROJECT_ID = 93L;
+    public static final Long TASK_ID = 46L;
+
+    public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
@@ -66,5 +73,27 @@ public class TestConstants
     public static Page<User> usersPage()
     {
         return new PageImpl<>(List.of(user()));
+    }
+
+    @SneakyThrows
+    public static Task task()
+    {
+        Task task = new Task(TASK_NAME, TASK_STATUS, project(), user());
+
+        Field field = Task.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(task, TASK_ID);
+
+        return task;
+    }
+
+    public static CreateTaskRequest createTaskRequest()
+    {
+        return new CreateTaskRequest(TASK_NAME, USER_ID);
+    }
+
+    public static Page<Task> tasksPage()
+    {
+        return new PageImpl<>(List.of(task()));
     }
 }

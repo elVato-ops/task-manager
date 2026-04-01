@@ -74,7 +74,7 @@ public class ProjectController
             @PathVariable @Positive Long id,
             Pageable pageable)
     {
-        Page<TaskResponse> page = taskService.findTasks(id, pageable);
+        Page<TaskResponse> page = taskService.getTasks(id, pageable);
         return new PageResponse<>(page);
     }
 }
