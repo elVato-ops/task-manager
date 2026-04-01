@@ -1,5 +1,6 @@
 package taskmanager.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -7,8 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 
-import static taskmanager.exception.ErrorCode.DATA_INVALID;
-import static taskmanager.exception.ErrorCode.NOT_FOUND;
+import static taskmanager.exception.ErrorCode.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler
@@ -25,6 +25,13 @@ public class GlobalExceptionHandler
     public ErrorResponse handleNotFoundException(NotFoundException e)
     {
         return response(e.getMessage(), e.getResource(), NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolation(ConstraintViolationException e)
+    {
+        return response(e.getMessage(), null, REQUEST_INVALID);
     }
 
     private static ErrorResponse response(String message, ResourceType resource, ErrorCode errorCode)

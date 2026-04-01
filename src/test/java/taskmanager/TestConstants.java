@@ -12,6 +12,7 @@ import taskmanager.task.TaskStatus;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.user.User;
 import taskmanager.user.dto.CreateUserRequest;
+import taskmanager.user.dto.UserResponse;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -19,17 +20,21 @@ import java.util.List;
 public class TestConstants
 {
     public static final String USER_NAME = "Bobek";
+    public static final String OTHER_USER_NAME = "Dudek";
     public static final String PASSWORD = "password";
     public static final String PROJECT_NAME = "Some project";
     public static final String TASK_NAME = "Some task";
 
     public static final Long USER_ID = 17L;
+    public static final Long OTHER_USER_ID = 37L;
     public static final Long PROJECT_ID = 93L;
     public static final Long TASK_ID = 46L;
 
     public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
+
+    public static final String INSTANT_STRING = "2024-01-15T10:30:00Z";
 
     @SneakyThrows
     public static Project project()
@@ -73,6 +78,21 @@ public class TestConstants
     public static Page<User> usersPage()
     {
         return new PageImpl<>(List.of(user()));
+    }
+
+    public static UserResponse userResponse()
+    {
+        return new UserResponse(USER_ID, USER_NAME);
+    }
+
+    public static UserResponse otherUserResponse()
+    {
+        return new UserResponse(OTHER_USER_ID, OTHER_USER_NAME);
+    }
+
+    public static Page<UserResponse> usersResponsePage()
+    {
+        return new PageImpl<>(List.of(userResponse(), otherUserResponse()));
     }
 
     @SneakyThrows

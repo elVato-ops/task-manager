@@ -2,10 +2,12 @@ package taskmanager.user;
 
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import taskmanager.response.PageResponse;
 import taskmanager.user.dto.CreateUserRequest;
@@ -18,6 +20,7 @@ import java.time.Instant;
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
+@Validated
 public class UserController
 {
     private final UserService userService;
@@ -43,7 +46,7 @@ public class UserController
     @GetMapping
     public PageResponse<UserResponse> getUsers(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) Instant fromCreationDate,
+            @RequestParam(required = false) @Past Instant fromCreationDate,
             Pageable pageable)
     {
         UserFilter filter = UserFilter.builder()

@@ -3,5 +3,6 @@ package taskmanager.exception;
 public enum ErrorCode
 {
     DATA_INVALID,
-    NOT_FOUND
+    NOT_FOUND,
+    REQUEST_INVALID
 }
