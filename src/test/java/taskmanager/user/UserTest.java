@@ -1,8 +1,6 @@
 package taskmanager.user;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import taskmanager.exception.ResourceType;
 import taskmanager.exception.ValidationException;
 
@@ -10,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static taskmanager.TestConstants.PASSWORD;
 import static taskmanager.TestConstants.USER_NAME;
 
-@ExtendWith(MockitoExtension.class)
 public class UserTest
 {
     @Test
