@@ -7,9 +7,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
+import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.Task;
 import taskmanager.task.TaskStatus;
 import taskmanager.task.dto.CreateTaskRequest;
+import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.User;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
@@ -51,6 +53,16 @@ public class TestConstants
     public static Page<Project> projectsPage()
     {
         return new PageImpl<>(List.of(project()));
+    }
+
+    public static ProjectResponse projectResponse()
+    {
+        return new ProjectResponse(PROJECT_ID, PROJECT_NAME, USER_ID);
+    }
+
+    public static Page<ProjectResponse> projectResponsePage()
+    {
+        return new PageImpl<>(List.of(projectResponse()));
     }
 
     public static CreateProjectRequest createProjectRequest()
@@ -115,5 +127,15 @@ public class TestConstants
     public static Page<Task> tasksPage()
     {
         return new PageImpl<>(List.of(task()));
+    }
+
+    public static TaskResponse taskResponse()
+    {
+        return new TaskResponse(TASK_ID, TASK_NAME, TASK_STATUS, PROJECT_ID, USER_ID);
+    }
+
+    public static Page<TaskResponse> taskResponsePage()
+    {
+        return new PageImpl<>(List.of(taskResponse()));
     }
 }

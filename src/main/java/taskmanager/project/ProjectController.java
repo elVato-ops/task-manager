@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import taskmanager.response.PageResponse;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -20,6 +21,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/projects")
 @AllArgsConstructor
+@Validated
 public class ProjectController
 {
     private final ProjectService projectService;
@@ -37,7 +39,7 @@ public class ProjectController
     }
 
     @GetMapping
-    public Page<ProjectResponse> getAll(
+    public PageResponse<ProjectResponse> getAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) @Positive Long ownerId,
             Pageable pageable)
@@ -47,7 +49,7 @@ public class ProjectController
                 .ownerId(ownerId)
                 .build();
 
-        return projectService.getProjects(filter, pageable);
+        return new PageResponse<>(projectService.getProjects(filter, pageable));
     }
 
     @GetMapping("{id}")
