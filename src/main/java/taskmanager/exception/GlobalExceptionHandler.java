@@ -6,6 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 
@@ -28,16 +30,14 @@ public class GlobalExceptionHandler
         return response(e.getMessage(), e.getResource(), NOT_FOUND);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
+    @ExceptionHandler({
+            ConstraintViolationException.class,
+            MethodArgumentNotValidException.class,
+            HandlerMethodValidationException.class,
+            MethodArgumentTypeMismatchException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(ConstraintViolationException e)
-    {
-        return response(e.getMessage(), null, REQUEST_INVALID);
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+    public ErrorResponse handleBadRequestException(Exception e)
     {
         return response(e.getMessage(), null, REQUEST_INVALID);
     }
