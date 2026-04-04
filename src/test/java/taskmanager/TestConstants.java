@@ -26,6 +26,7 @@ public class TestConstants
     public static final String PASSWORD = "password";
     public static final String PROJECT_NAME = "Some project";
     public static final String TASK_NAME = "Some task";
+    public static final String OTHER_TASK_NAME = "Other task";
 
     public static final Long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
