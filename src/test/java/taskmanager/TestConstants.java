@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import taskmanager.auth.LoginResponse;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
@@ -27,6 +28,7 @@ public class TestConstants
     public static final String PROJECT_NAME = "Some project";
     public static final String TASK_NAME = "Some task";
     public static final String OTHER_TASK_NAME = "Other task";
+    public static final String TOKEN = "kosdfnksjdnfkjabnkasjfbjabf";
 
     public static final Long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
@@ -138,5 +140,10 @@ public class TestConstants
     public static Page<TaskResponse> taskResponsePage()
     {
         return new PageImpl<>(List.of(taskResponse()));
+    }
+
+    public static LoginResponse loginResponse()
+    {
+        return new LoginResponse(TOKEN);
     }
 }

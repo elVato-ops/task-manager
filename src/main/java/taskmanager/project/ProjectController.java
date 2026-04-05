@@ -2,16 +2,16 @@ package taskmanager.project;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import taskmanager.response.PageResponse;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
+import taskmanager.response.PageResponse;
 import taskmanager.task.TaskService;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
@@ -20,7 +20,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/projects")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Validated
 public class ProjectController
 {

@@ -1,7 +1,7 @@
 package taskmanager.task;
 
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ import taskmanager.task.filter.TaskFilter;
 
 @RestController
 @RequestMapping("/tasks")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TaskController
 {
     private final TaskService taskService;

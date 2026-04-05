@@ -2,6 +2,7 @@ package taskmanager.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,6 +29,13 @@ public class GlobalExceptionHandler
     public ErrorResponse handleNotFoundException(NotFoundException e)
     {
         return response(e.getMessage(), e.getResource(), NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleBadCredentialsException(BadCredentialsException e)
+    {
+        return response(e.getMessage(), null, UNAUTHORIZED);
     }
 
     @ExceptionHandler({

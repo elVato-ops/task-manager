@@ -1,7 +1,7 @@
 package taskmanager.utils;
 
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -9,7 +9,7 @@ import taskmanager.project.dto.ProjectResponse;
 import taskmanager.user.User;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProjectMapper
 {
     public Project toEntity(@Valid CreateProjectRequest request, User user)

@@ -1,6 +1,6 @@
 package taskmanager.utils;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import taskmanager.user.User;
@@ -8,7 +8,7 @@ import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserMapper
 {
     private final PasswordEncoder passwordEncoder;

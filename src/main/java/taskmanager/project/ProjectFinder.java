@@ -1,6 +1,6 @@
 package taskmanager.project;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,7 +10,7 @@ import taskmanager.exception.NotFoundException;
 import static taskmanager.exception.ResourceType.PROJECT;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProjectFinder
 {
     private final ProjectRepository projectRepository;

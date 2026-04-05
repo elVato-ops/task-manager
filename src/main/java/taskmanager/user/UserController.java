@@ -4,7 +4,7 @@ package taskmanager.user;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,7 +19,7 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/users")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Validated
 public class UserController
 {

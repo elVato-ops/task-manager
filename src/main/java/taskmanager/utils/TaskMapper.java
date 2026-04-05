@@ -1,6 +1,6 @@
 package taskmanager.utils;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import taskmanager.project.Project;
 import taskmanager.task.Task;
@@ -10,7 +10,7 @@ import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.User;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TaskMapper
 {
     public Task toEntity(CreateTaskRequest request, Project project, User user)
