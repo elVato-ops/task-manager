@@ -30,11 +30,13 @@ public class TestConstants
     public static final String TASK_NAME = "Some task";
     public static final String OTHER_TASK_NAME = "Other task";
     public static final String TOKEN = "kosdfnksjdnfkjabnkasjfbjabf";
+    public static final String SECRET = "very-long-secret-key-at-least-256-bits-long-for-hs256";
 
     public static final Long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
     public static final Long PROJECT_ID = 93L;
     public static final Long TASK_ID = 46L;
+    public static final long EXPIRATION = 86400000;
 
     public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
 
