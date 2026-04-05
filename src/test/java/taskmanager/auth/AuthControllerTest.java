@@ -7,19 +7,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.auth.dto.LoginRequest;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(AuthController.class)
-@WithMockUser
 public class AuthControllerTest
 {
     @MockBean
@@ -47,7 +45,6 @@ public class AuthControllerTest
 
             //WHEN
             mockMvc.perform(post("/auth/login")
-                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
 
@@ -72,7 +69,6 @@ public class AuthControllerTest
 
             //WHEN
             mockMvc.perform(post("/auth/login")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -97,7 +93,6 @@ public class AuthControllerTest
 
             //WHEN
             mockMvc.perform(post("/auth/login")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -125,7 +120,6 @@ public class AuthControllerTest
 
             //WHEN
             mockMvc.perform(post("/auth/login")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 

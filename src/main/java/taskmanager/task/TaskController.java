@@ -3,6 +3,7 @@ package taskmanager.task;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,14 +23,16 @@ public class TaskController
     public PageResponse<TaskResponse> getAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) TaskStatus status,
-            @RequestParam(required = false) @Positive Long assigneeId,
             @RequestParam(required = false) @Positive Long projectId,
-            Pageable pageable)
+            Pageable pageable,
+            Authentication authentication)
     {
+        Long userId = (Long) authentication.getPrincipal();
+
         TaskFilter taskFilter = TaskFilter.builder()
                 .name(name)
                 .status(status)
-                .assigneeId(assigneeId)
+                .assigneeId(userId)
                 .projectId(projectId)
                 .build();
 

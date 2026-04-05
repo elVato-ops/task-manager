@@ -1,4 +1,4 @@
-package taskmanager.auth;
+package taskmanager.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

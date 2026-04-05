@@ -1,4 +1,4 @@
-package taskmanager.security;
+package taskmanager.auth;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;

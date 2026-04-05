@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import taskmanager.security.JwtUtils;
+import taskmanager.auth.dto.LoginResponse;
 import taskmanager.user.UserRepository;
 
 import java.util.Optional;

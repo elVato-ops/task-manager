@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import taskmanager.security.JwtUtils;
+import taskmanager.auth.dto.LoginRequest;
+import taskmanager.auth.dto.LoginResponse;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
 

@@ -29,14 +29,14 @@ public class TaskService
     private final TaskMapper taskMapper;
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request, Long projectId)
+    public TaskResponse createTask(CreateTaskRequest request, Long projectId, Long userId)
     {
         Project project = projectFinder.getProject(projectId);
 
         User user = null;
-        if (request.userId() != null)
+        if (userId != null)
         {
-            user = userFinder.getUser(request.userId());
+            user = userFinder.getUser(userId);
         }
 
         return taskMapper.toResponse(

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.dto.TaskResponse;
-import taskmanager.user.dto.UserResponse;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,17 +20,6 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUser_whenSuccess() throws Exception
         {
             //WHEN
-            MvcResult result = postCreateUser(USER_NAME, PASSWORD)
-
-            //THEN
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.name").value(USER_NAME))
-                    .andReturn();
-
-            //AND GIVEN
-            Long userId = objectMapper.readValue(result.getResponse().getContentAsString(), UserResponse.class).id();
-
-            //WHEN
             getUser(userId)
 
             //THEN
@@ -44,7 +32,6 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUsers_whenGetAll() throws Exception
         {
             //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
             Long otherUserId = createUser(OTHER_USER_NAME, PASSWORD);
 
             //WHEN
@@ -92,11 +79,8 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         @Test
         public void returnsProject_whenSuccess() throws Exception
         {
-            //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
-
             //WHEN
-            MvcResult result = postCreateProject(PROJECT_NAME, userId)
+            MvcResult result = postCreateProject(PROJECT_NAME)
 
             //THEN
                     .andExpect(status().isCreated())
@@ -120,28 +104,12 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         @Test
         public void returns400_whenNameEmpty() throws Exception
         {
-            //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
-
             //WHEN
-            postCreateProject("", userId)
+            postCreateProject("")
 
             //THEN
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
-                    .andExpect(jsonPath("$.timestamp").exists());
-        }
-
-        @Test
-        public void returns404_whenUserNotExists() throws Exception
-        {
-            //WHEN
-            postCreateProject(PROJECT_NAME, USER_ID)
-
-            //THEN
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.resource").value("USER"))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
 
@@ -166,11 +134,10 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsTask_whenSuccess() throws Exception
         {
             //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
-            Long projectId = createProject(PROJECT_NAME, userId);
+            Long projectId = createProject(PROJECT_NAME);
 
             //WHEN
-            MvcResult result = postCreateTask(TASK_NAME, userId, projectId)
+            MvcResult result = postCreateTask(TASK_NAME, projectId)
 
             //THEN
                     .andExpect(status().isCreated())
@@ -211,10 +178,9 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsFilteredTask_whenSuccess() throws Exception
         {
             //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
-            Long projectId = createProject(PROJECT_NAME, userId);
-            createTask(TASK_NAME, userId, projectId);
-            createTask(OTHER_TASK_NAME, userId, projectId);
+            Long projectId = createProject(PROJECT_NAME);
+            createTask(TASK_NAME, projectId);
+            createTask(OTHER_TASK_NAME, projectId);
 
             //WHEN
             getTasksWithFilter(TASK_NAME)
@@ -232,11 +198,10 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns400_whenNameEmpty() throws Exception
         {
             //GIVEN
-            Long userId = createUser(USER_NAME, PASSWORD);
-            Long projectId = createProject(PROJECT_NAME, userId);
+            Long projectId = createProject(PROJECT_NAME);
 
             //WHEN
-            postCreateTask("", userId, projectId)
+            postCreateTask("", projectId)
 
             //THEN
                     .andExpect(status().isBadRequest())

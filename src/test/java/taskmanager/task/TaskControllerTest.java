@@ -3,12 +3,10 @@ package taskmanager.task;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.BaseControllerTest;
 import taskmanager.task.filter.TaskFilter;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -19,14 +17,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(TaskController.class)
-@WithMockUser
-public class TaskControllerTest
+public class TaskControllerTest extends BaseControllerTest
 {
     @MockBean
     private TaskService taskService;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Nested
     class GetAllTasks
@@ -42,7 +36,6 @@ public class TaskControllerTest
             mockMvc.perform(get("/tasks")
                             .param("name", TASK_NAME)
                             .param("status", TASK_STATUS.toString())
-                            .param("assigneeId", USER_ID.toString())
                             .param("projectId", PROJECT_ID.toString())
                             .param("page", String.valueOf(PAGEABLE.getPageNumber()))
                             .param("size", String.valueOf(PAGEABLE.getPageSize())))
@@ -93,21 +86,6 @@ public class TaskControllerTest
 
             verify(taskService, times(1)).getTasks(any(TaskFilter.class), any(Pageable.class));
             verifyNoMoreInteractions(taskService);
-        }
-
-        @Test
-        public void returns400_whenAssigneeIdNegative() throws Exception
-        {
-            //WHEN
-            mockMvc.perform(get("/tasks")
-                    .param("assigneeId", "-144"))
-
-            //THEN
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
-                    .andExpect(jsonPath("$.timestamp").exists());
-
-            verifyNoInteractions(taskService);
         }
 
         @Test

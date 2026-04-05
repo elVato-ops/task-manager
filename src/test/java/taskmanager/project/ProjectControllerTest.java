@@ -3,13 +3,11 @@ package taskmanager.project;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.BaseControllerTest;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -19,24 +17,19 @@ import taskmanager.task.dto.CreateTaskRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(ProjectController.class)
-@WithMockUser
-public class ProjectControllerTest
+public class ProjectControllerTest extends BaseControllerTest
 {
     @MockBean
     private ProjectService projectService;
 
     @MockBean
     private TaskService taskService;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Nested
     public class GetProjectById
@@ -109,8 +102,7 @@ public class ProjectControllerTest
             mockMvc.perform(get("/projects")
                         .param("page", String.valueOf(PAGEABLE.getPageNumber()))
                         .param("size", String.valueOf(PAGEABLE.getPageSize()))
-                        .param("name", PROJECT_NAME)
-                        .param("ownerId", USER_ID.toString()))
+                        .param("name", PROJECT_NAME))
 
             //THEN
                     .andExpect(status().isOk())
@@ -150,21 +142,6 @@ public class ProjectControllerTest
 
             verifyNoMoreInteractions(projectService);
         }
-
-        @Test
-        public void returns400_whenNegativeOwnerId() throws Exception
-        {
-            //WHEN
-            mockMvc.perform(get("/projects")
-                        .param("ownerId", "-20"))
-
-            //THEN
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
-                    .andExpect(jsonPath("$.timestamp").exists());
-
-            verifyNoInteractions(projectService);
-        }
     }
 
     @Nested
@@ -176,11 +153,10 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "Some project",
-              "userId": "17"
+              "name": "Some project"
             }""";
 
-            when(projectService.createProject(any(CreateProjectRequest.class)))
+            when(projectService.createProject(any(CreateProjectRequest.class), eq(USER_ID)))
                     .thenReturn(projectResponse());
 
             ArgumentCaptor<CreateProjectRequest> captor =
@@ -188,7 +164,6 @@ public class ProjectControllerTest
 
             //WHEN
             mockMvc.perform(post("/projects")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -199,11 +174,10 @@ public class ProjectControllerTest
                     .andExpect(jsonPath("$.name").value(PROJECT_NAME))
                     .andExpect(jsonPath("$.ownerId").value(USER_ID));
 
-            verify(projectService, times(1)).createProject(captor.capture());
+            verify(projectService, times(1)).createProject(captor.capture(), USER_ID);
             verifyNoMoreInteractions(projectService);
 
             CreateProjectRequest value = captor.getValue();
-            assertEquals(USER_ID, value.userId());
             assertEquals(PROJECT_NAME, value.name());
         }
 
@@ -213,13 +187,11 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "",
-              "userId": "12"
+              "name": ""
             }""";
 
             //WHEN
             mockMvc.perform(post("/projects")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -230,31 +202,6 @@ public class ProjectControllerTest
 
             verifyNoInteractions(projectService);
         }
-
-        @Test
-        public void returns400_whenOwnerIdInvalid() throws Exception
-        {
-            //GIVEN
-            String json = """
-            {
-              "name": "Some project",
-              "userId": "-12"
-            }""";
-
-            //WHEN
-            mockMvc.perform(post("/projects")
-                            .with(csrf())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(json))
-
-                    //THEN
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
-                    .andExpect(jsonPath("$.timestamp").exists());
-
-            verifyNoInteractions(projectService);
-        }
-
     }
 
     @Nested
@@ -266,11 +213,10 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "Some task",
-              "userId": "17"
+              "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
                     .thenReturn(taskResponse());
 
             ArgumentCaptor<CreateTaskRequest> captor =
@@ -278,7 +224,6 @@ public class ProjectControllerTest
 
             //WHEN
             mockMvc.perform(post("/projects/" + PROJECT_ID + "/tasks")
-                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
 
@@ -291,12 +236,11 @@ public class ProjectControllerTest
                     .andExpect(jsonPath("$.projectId").value(PROJECT_ID))
                     .andExpect(jsonPath("$.assigneeId").value(USER_ID));
 
-            verify(taskService, times(1)).createTask(captor.capture(), eq(PROJECT_ID));
+            verify(taskService, times(1)).createTask(captor.capture(), eq(PROJECT_ID), eq(USER_ID));
             verifyNoMoreInteractions(taskService);
 
             CreateTaskRequest task = captor.getValue();
             assertEquals(TASK_NAME, task.name());
-            assertEquals(USER_ID, task.userId());
         }
         
         @Test
@@ -305,13 +249,11 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "Some task",
-              "userId": "17"
+              "name": "Some task"
             }""";
 
             //WHEN
             mockMvc.perform(post("/projects/" + -PROJECT_ID + "/tasks")
-                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
 
@@ -329,16 +271,14 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "Some task",
-              "userId": "17"
+              "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
                     .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
 
             //WHEN
             mockMvc.perform(post("/projects/" + PROJECT_ID + "/tasks")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -356,20 +296,18 @@ public class ProjectControllerTest
             //GIVEN
             String json = """
             {
-              "name": "Some task",
-              "userId": "17"
+              "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
                     .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
 
             //WHEN
             mockMvc.perform(post("/projects/" + PROJECT_ID + "/tasks")
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
-                    //THEN
+            //THEN
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.timestamp").exists())

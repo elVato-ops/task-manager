@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -29,9 +30,12 @@ public class ProjectController
 
     @PostMapping
     public ResponseEntity<ProjectResponse> create(
-            @Valid @RequestBody CreateProjectRequest request)
+            @Valid @RequestBody CreateProjectRequest request,
+            Authentication authentication)
     {
-        ProjectResponse project = projectService.createProject(request);
+        Long userId = (Long) authentication.getPrincipal();
+
+        ProjectResponse project = projectService.createProject(request, userId);
 
         return ResponseEntity
                 .created(URI.create("/projects/" + project.id()))
@@ -41,12 +45,14 @@ public class ProjectController
     @GetMapping
     public PageResponse<ProjectResponse> getAll(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) @Positive Long ownerId,
-            Pageable pageable)
+            Pageable pageable,
+            Authentication authentication)
     {
+        Long userId = (Long) authentication.getPrincipal();
+
         ProjectFilter filter = ProjectFilter.builder()
                 .name(name)
-                .ownerId(ownerId)
+                .ownerId(userId)
                 .build();
 
         return new PageResponse<>(projectService.getProjects(filter, pageable));
@@ -62,9 +68,12 @@ public class ProjectController
     @PostMapping("{id}/tasks")
     public ResponseEntity<TaskResponse> createTask(
             @PathVariable @Positive Long id,
-            @Valid @RequestBody CreateTaskRequest request)
+            @Valid @RequestBody CreateTaskRequest request,
+            Authentication authentication)
     {
-        TaskResponse task = taskService.createTask(request, id);
+        Long userId = (Long) authentication.getPrincipal();
+
+        TaskResponse task = taskService.createTask(request, id, userId);
 
         return ResponseEntity
                 .created(URI.create("/projects/" + id + "/tasks/" + task.id()))

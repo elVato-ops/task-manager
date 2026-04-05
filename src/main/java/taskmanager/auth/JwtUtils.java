@@ -1,4 +1,4 @@
-package taskmanager.security;
+package taskmanager.auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

@@ -5,8 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import taskmanager.auth.LoginRequest;
-import taskmanager.auth.LoginResponse;
+import taskmanager.auth.dto.LoginRequest;
+import taskmanager.auth.dto.LoginResponse;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
@@ -32,7 +32,7 @@ public class TestConstants
     public static final String TOKEN = "kosdfnksjdnfkjabnkasjfbjabf";
     public static final String SECRET = "very-long-secret-key-at-least-256-bits-long-for-hs256";
 
-    public static final Long USER_ID = 17L;
+    public static final long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
     public static final Long PROJECT_ID = 93L;
     public static final Long TASK_ID = 46L;
@@ -73,7 +73,7 @@ public class TestConstants
 
     public static CreateProjectRequest createProjectRequest()
     {
-        return new CreateProjectRequest(PROJECT_NAME, USER_ID);
+        return new CreateProjectRequest(PROJECT_NAME);
     }
 
     public static CreateUserRequest createUserRequest()
@@ -127,7 +127,7 @@ public class TestConstants
 
     public static CreateTaskRequest createTaskRequest()
     {
-        return new CreateTaskRequest(TASK_NAME, USER_ID);
+        return new CreateTaskRequest(TASK_NAME);
     }
 
     public static Page<Task> tasksPage()

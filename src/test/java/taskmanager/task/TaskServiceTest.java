@@ -58,7 +58,7 @@ public class TaskServiceTest
             ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
 
             //WHEN
-            TaskResponse task = taskService.createTask(createTaskRequest(), PROJECT_ID);
+            TaskResponse task = taskService.createTask(createTaskRequest(), PROJECT_ID, USER_ID);
 
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
@@ -85,7 +85,7 @@ public class TaskServiceTest
         public void returnsTask_whenNullUserId()
         {
             //GIVEN
-            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME, null);
+            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME);
 
             when(projectFinder.getProject(PROJECT_ID))
                     .thenReturn(project());
@@ -96,7 +96,7 @@ public class TaskServiceTest
             ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
 
             //WHEN
-            TaskResponse task = taskService.createTask(createTaskRequest, PROJECT_ID);
+            TaskResponse task = taskService.createTask(createTaskRequest, PROJECT_ID, null);
 
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
@@ -121,14 +121,14 @@ public class TaskServiceTest
         public void throwsNotFoundException_whenProjectNotExists()
         {
             //GIVEN
-            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME, null);
+            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME);
 
             when(projectFinder.getProject(PROJECT_ID))
                     .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
 
             //WHEN /THEN
             assertThrows(NotFoundException.class,
-                    () -> taskService.createTask(createTaskRequest, PROJECT_ID));
+                    () -> taskService.createTask(createTaskRequest, PROJECT_ID, USER_ID));
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
@@ -148,7 +148,7 @@ public class TaskServiceTest
 
             //WHEN /THEN
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                    () -> taskService.createTask(createTaskRequest(), PROJECT_ID));
+                    () -> taskService.createTask(createTaskRequest(), PROJECT_ID, USER_ID));
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);

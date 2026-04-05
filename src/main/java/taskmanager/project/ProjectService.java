@@ -24,9 +24,9 @@ public class ProjectService
     private final UserFinder userFinder;
 
     @Transactional
-    public ProjectResponse createProject(CreateProjectRequest request)
+    public ProjectResponse createProject(CreateProjectRequest request, Long userId)
     {
-        User user = userFinder.getUser(request.userId());
+        User user = userFinder.getUser(userId);
 
         return projectMapper.toResponse(
                 projectRepository

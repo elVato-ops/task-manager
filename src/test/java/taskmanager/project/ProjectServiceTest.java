@@ -51,7 +51,7 @@ public class ProjectServiceTest
             ArgumentCaptor<Project> captor = ArgumentCaptor.forClass(Project.class);
 
             //WHEN
-            ProjectResponse projectResponse = projectService.createProject(createProjectRequest());
+            ProjectResponse projectResponse = projectService.createProject(createProjectRequest(), USER_ID);
 
             //THEN
             verify(userFinder, times(1)).getUser(USER_ID);
@@ -75,7 +75,7 @@ public class ProjectServiceTest
 
             //WHEN / THEN
             assertThrows(NotFoundException.class,
-                    () -> projectService.createProject(createProjectRequest()));
+                    () -> projectService.createProject(createProjectRequest(), USER_ID));
 
             verify(userFinder, times(1)).getUser(USER_ID);
             verifyNoMoreInteractions(userFinder);

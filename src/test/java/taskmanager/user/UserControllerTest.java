@@ -3,13 +3,11 @@ package taskmanager.user;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.BaseControllerTest;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.user.dto.CreateUserRequest;
@@ -21,21 +19,16 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(UserController.class)
-@WithMockUser
-public class UserControllerTest
+public class UserControllerTest extends BaseControllerTest
 {
     @MockBean
     private UserService userService;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Nested
     class CreateUser
@@ -57,7 +50,6 @@ public class UserControllerTest
 
             //WHEN
             mockMvc.perform(post(URI.create("/users"))
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
@@ -87,7 +79,6 @@ public class UserControllerTest
 
             //WHEN
             mockMvc.perform(post(URI.create("/users"))
-                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
 
@@ -109,7 +100,6 @@ public class UserControllerTest
 
             //WHEN
             mockMvc.perform(post(URI.create("/users"))
-                            .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
