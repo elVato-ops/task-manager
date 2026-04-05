@@ -3,11 +3,15 @@ package taskmanager.task;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import taskmanager.BaseControllerTest;
+import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.auth.JwtAuthFilter;
+import taskmanager.auth.JwtUtils;
 import taskmanager.task.filter.TaskFilter;
+import taskmanager.utils.WithMockUserId;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -17,10 +21,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(TaskController.class)
-public class TaskControllerTest extends BaseControllerTest
+@WithMockUserId
+public class TaskControllerTest
 {
     @MockBean
     private TaskService taskService;
+
+    @Autowired
+    protected MockMvc mockMvc;
+
+    @MockBean
+    private JwtUtils jwtUtils;
+
+    @MockBean
+    protected JwtAuthFilter jwtAuthFilter;
 
     @Nested
     class GetAllTasks

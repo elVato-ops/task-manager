@@ -3,17 +3,21 @@ package taskmanager.project;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import taskmanager.BaseControllerTest;
+import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.auth.JwtAuthFilter;
+import taskmanager.auth.JwtUtils;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.task.TaskService;
 import taskmanager.task.dto.CreateTaskRequest;
+import taskmanager.utils.WithMockUserId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -23,13 +27,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(ProjectController.class)
-public class ProjectControllerTest extends BaseControllerTest
+@WithMockUserId
+public class ProjectControllerTest
 {
     @MockBean
     private ProjectService projectService;
 
     @MockBean
     private TaskService taskService;
+
+    @Autowired
+    protected MockMvc mockMvc;
+
+    @MockBean
+    private JwtUtils jwtUtils;
+
+    @MockBean
+    protected JwtAuthFilter jwtAuthFilter;
+
 
     @Nested
     public class GetProjectById
