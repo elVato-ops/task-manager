@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import taskmanager.auth.LoginRequest;
 import taskmanager.auth.LoginResponse;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -145,5 +146,10 @@ public class TestConstants
     public static LoginResponse loginResponse()
     {
         return new LoginResponse(TOKEN);
+    }
+
+    public static LoginRequest loginRequest()
+    {
+        return new LoginRequest(USER_NAME, PASSWORD);
     }
 }
