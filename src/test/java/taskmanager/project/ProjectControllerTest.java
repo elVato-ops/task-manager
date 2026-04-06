@@ -3,14 +3,13 @@ package taskmanager.project;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import taskmanager.auth.JwtAuthFilter;
-import taskmanager.auth.JwtUtils;
+import taskmanager.BaseControllerTest;
+import taskmanager.config.TestSecurityConfig;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.CreateProjectRequest;
@@ -28,23 +27,14 @@ import static taskmanager.TestConstants.*;
 
 @WebMvcTest(ProjectController.class)
 @WithMockUserId
-public class ProjectControllerTest
+@Import(TestSecurityConfig.class)
+public class ProjectControllerTest extends BaseControllerTest
 {
     @MockBean
     private ProjectService projectService;
 
     @MockBean
     private TaskService taskService;
-
-    @Autowired
-    protected MockMvc mockMvc;
-
-    @MockBean
-    private JwtUtils jwtUtils;
-
-    @MockBean
-    protected JwtAuthFilter jwtAuthFilter;
-
 
     @Nested
     public class GetProjectById
@@ -189,7 +179,7 @@ public class ProjectControllerTest
                     .andExpect(jsonPath("$.name").value(PROJECT_NAME))
                     .andExpect(jsonPath("$.ownerId").value(USER_ID));
 
-            verify(projectService, times(1)).createProject(captor.capture(), USER_ID);
+            verify(projectService, times(1)).createProject(captor.capture(), eq(USER_ID));
             verifyNoMoreInteractions(projectService);
 
             CreateProjectRequest value = captor.getValue();

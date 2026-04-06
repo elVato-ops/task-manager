@@ -2,12 +2,11 @@ package taskmanager.auth;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.test.web.servlet.MockMvc;
+import taskmanager.BaseControllerTest;
 import taskmanager.auth.dto.LoginRequest;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -18,13 +17,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static taskmanager.TestConstants.*;
 
 @WebMvcTest(AuthController.class)
-public class AuthControllerTest
+public class AuthControllerTest extends BaseControllerTest
 {
     @MockBean
     private AuthService authService;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Nested
     class Login

@@ -3,14 +3,11 @@ package taskmanager.user;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import taskmanager.auth.JwtAuthFilter;
-import taskmanager.auth.JwtUtils;
+import taskmanager.BaseControllerTest;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.user.dto.CreateUserRequest;
@@ -30,19 +27,10 @@ import static taskmanager.TestConstants.*;
 
 @WebMvcTest(UserController.class)
 @WithMockUserId
-public class UserControllerTest
+public class UserControllerTest extends BaseControllerTest
 {
     @MockBean
     private UserService userService;
-
-    @Autowired
-    protected MockMvc mockMvc;
-
-    @MockBean
-    private JwtUtils jwtUtils;
-
-    @MockBean
-    protected JwtAuthFilter jwtAuthFilter;
 
     @Nested
     class CreateUser
