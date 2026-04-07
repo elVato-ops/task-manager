@@ -43,7 +43,7 @@ public class Project
         this.owner = owner;
     }
 
-    public void throwValidation(String message)
+    private void throwValidation(String message)
     {
         throw new ValidationException(message, PROJECT);
     }

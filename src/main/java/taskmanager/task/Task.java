@@ -59,7 +59,7 @@ public class Task
         this.assignee = assignee;
     }
 
-    public void throwValidation(String message)
+    private void throwValidation(String message)
     {
         throw new ValidationException(message, TASK);
     }

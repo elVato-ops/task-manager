@@ -57,7 +57,7 @@ public class User
         this.creationDate = Instant.now();
     }
 
-    public void throwValidation(String message)
+    private void throwValidation(String message)
     {
         throw new ValidationException(message, USER);
     }
