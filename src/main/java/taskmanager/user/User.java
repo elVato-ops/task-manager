@@ -25,16 +25,25 @@ public class User
     private String name;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
     private Instant creationDate;
 
-    public User(String name, String password)
+    public User(String name, UserRole role, String password)
     {
         if (!StringUtils.hasText(name))
         {
             throwValidation("User name must not be empty");
+        }
+
+        if (role == null)
+        {
+            throwValidation("You must specify role for user");
         }
 
         if (!StringUtils.hasText(password))
@@ -43,6 +52,7 @@ public class User
         }
 
         this.name = name;
+        this.role = role;
         this.password = password;
         this.creationDate = Instant.now();
     }

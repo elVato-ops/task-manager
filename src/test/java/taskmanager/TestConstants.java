@@ -15,6 +15,7 @@ import taskmanager.task.TaskStatus;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.User;
+import taskmanager.user.UserRole;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 
@@ -39,6 +40,7 @@ public class TestConstants
     public static final long EXPIRATION = 86400000;
 
     public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
+    public static final UserRole USER_ROLE = UserRole.USER;
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
@@ -78,13 +80,13 @@ public class TestConstants
 
     public static CreateUserRequest createUserRequest()
     {
-        return new CreateUserRequest(USER_NAME, PASSWORD);
+        return new CreateUserRequest(USER_NAME, PASSWORD, USER_ROLE);
     }
 
     @SneakyThrows
     public static User user()
     {
-        User user = new User(USER_NAME, PASSWORD);
+        User user = new User(USER_NAME, USER_ROLE, PASSWORD);
 
         Field field = User.class.getDeclaredField("id");
         field.setAccessible(true);
@@ -100,12 +102,12 @@ public class TestConstants
 
     public static UserResponse userResponse()
     {
-        return new UserResponse(USER_ID, USER_NAME);
+        return new UserResponse(USER_ID, USER_NAME, USER_ROLE);
     }
 
     public static UserResponse otherUserResponse()
     {
-        return new UserResponse(OTHER_USER_ID, OTHER_USER_NAME);
+        return new UserResponse(OTHER_USER_ID, OTHER_USER_NAME, USER_ROLE);
     }
 
     public static Page<UserResponse> usersResponsePage()

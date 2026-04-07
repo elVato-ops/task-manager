@@ -15,13 +15,14 @@ public class UserMapper
 
     public User toEntity(CreateUserRequest request)
     {
-        return new User(request.name(), passwordEncoder.encode(request.password()));
+        return new User(request.name(), request.role(), passwordEncoder.encode(request.password()));
     }
 
     public UserResponse toResponse(User user)
     {
         return new UserResponse(
                 user.getId(),
-                user.getName());
+                user.getName(),
+                user.getRole());
     }
 }

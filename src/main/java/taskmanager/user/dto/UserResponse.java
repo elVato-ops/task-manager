@@ -1,5 +1,7 @@
 package taskmanager.user.dto;
 
-public record UserResponse(Long id, String name)
+import taskmanager.user.UserRole;
+
+public record UserResponse(Long id, String name, UserRole role)
 {
 }

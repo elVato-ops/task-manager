@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.dto.TaskResponse;
+import taskmanager.user.UserRole;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,6 +21,8 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUser_whenSuccess() throws Exception
         {
             //WHEN
+            createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            loginAndSetToken(OTHER_USER_NAME, PASSWORD);
             getUser(userId)
 
             //THEN
@@ -32,7 +35,8 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUsers_whenGetAll() throws Exception
         {
             //GIVEN
-            Long otherUserId = createUser(OTHER_USER_NAME, PASSWORD);
+            Long otherUserId = createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            loginAndSetToken(OTHER_USER_NAME, PASSWORD);
 
             //WHEN
             getUsers()
@@ -51,7 +55,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns400_whenNameEmpty() throws Exception
         {
             //WHEN
-            postCreateUser("", PASSWORD)
+            postCreateUser("", PASSWORD, UserRole.USER)
 
             //THEN
                     .andExpect(status().isBadRequest())
@@ -60,9 +64,24 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
-        public void returns404_whenNotExists() throws Exception
+        public void returns403_whenNoAccess() throws Exception
         {
             //WHEN
+            getUser(USER_ID)
+
+            //THEN
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        public void returns404_whenUserNotExists() throws Exception
+        {
+            //WHEN
+            createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            loginAndSetToken(OTHER_USER_NAME, PASSWORD);
+
             getUser(997L)
 
             //THEN

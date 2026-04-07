@@ -8,6 +8,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import taskmanager.BaseControllerTest;
+import taskmanager.exception.ErrorCode;
+import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ResourceType;
 import taskmanager.user.dto.CreateUserRequest;
@@ -42,7 +44,8 @@ public class UserControllerTest extends BaseControllerTest
             String json = """
             {
               "name": "Bobek",
-              "password": "password"
+              "password": "password",
+              "role": "USER"
             }""";
 
             when(userService.createUser(any(CreateUserRequest.class)))
@@ -59,7 +62,8 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", "/users/" + USER_ID))
                     .andExpect(jsonPath("$.id").value(USER_ID))
-                    .andExpect(jsonPath("$.name").value(USER_NAME));
+                    .andExpect(jsonPath("$.name").value(USER_NAME))
+                    .andExpect(jsonPath("$.role").value(USER_ROLE.toString()));
 
             verify(userService, times(1)).createUser(captor.capture());
             verifyNoMoreInteractions(userService);
@@ -67,6 +71,7 @@ public class UserControllerTest extends BaseControllerTest
             CreateUserRequest value = captor.getValue();
             assertEquals(USER_NAME, value.name());
             assertEquals(PASSWORD, value.password());
+            assertEquals(USER_ROLE, value.role());
         }
 
         @Test
@@ -76,7 +81,8 @@ public class UserControllerTest extends BaseControllerTest
             String json = """
             {
               "name": "",
-              "password": "password"
+              "password": "password",
+              "role": "USER"
             }""";
 
             //WHEN
@@ -97,7 +103,30 @@ public class UserControllerTest extends BaseControllerTest
             String json = """
             {
               "name": "Bobek",
-              "password": ""
+              "password": "",
+              "role": "USER"
+            }""";
+
+            //WHEN
+            mockMvc.perform(post(URI.create("/users"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(userService);
+        }
+
+        @Test
+        public void returns400_whenRoleIncorrect() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "name": "Bobek",
+              "password": "password",
+              "role": "sdfsvsdvsdvsd"
             }""";
 
             //WHEN
@@ -119,17 +148,18 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenUserExists() throws Exception
         {
             //GIVEN
-            when(userService.getUser(USER_ID)).thenReturn(userResponse());
+            when(userService.getUser(OTHER_USER_ID, USER_ID)).thenReturn(otherUserResponse());
 
             //WHEN
-            mockMvc.perform(get("/users/" + USER_ID))
+            mockMvc.perform(get("/users/" + OTHER_USER_ID))
 
             //THEN
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(USER_ID))
-                    .andExpect(jsonPath("$.name").value(USER_NAME));
+                    .andExpect(jsonPath("$.id").value(OTHER_USER_ID))
+                    .andExpect(jsonPath("$.name").value(OTHER_USER_NAME))
+                    .andExpect(jsonPath("$.role").value(USER_ROLE.toString()));
 
-            verify(userService, times(1)).getUser(USER_ID);
+            verify(userService, times(1)).getUser(OTHER_USER_ID, USER_ID);
             verifyNoMoreInteractions(userService);
         }
 
@@ -150,10 +180,29 @@ public class UserControllerTest extends BaseControllerTest
         }
 
         @Test
+        public void returns403_whenNoRights() throws Exception
+        {
+            //GIVEN
+            when(userService.getUser(OTHER_USER_ID, USER_ID))
+                    .thenThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN));
+
+            //WHEN
+            mockMvc.perform(get("/users/" + OTHER_USER_ID))
+
+            //THEN
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.FORBIDDEN.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+
+            verify(userService, times(1)).getUser(OTHER_USER_ID, USER_ID);
+            verifyNoMoreInteractions(userService);
+        }
+
+        @Test
         public void returns404_whenUserNotExists() throws Exception
         {
             //GIVEN
-            when(userService.getUser(USER_ID))
+            when(userService.getUser(USER_ID, USER_ID))
                     .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
 
             //WHEN
@@ -165,7 +214,7 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.resource").value("USER"))
                     .andExpect(jsonPath("$.timestamp").exists());
 
-            verify(userService, times(1)).getUser(USER_ID);
+            verify(userService, times(1)).getUser(USER_ID, USER_ID);
             verifyNoMoreInteractions(userService);
         }
     }
@@ -177,7 +226,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(userService.getUsers(any(UserFilter.class), any(Pageable.class)))
+            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
                     .thenReturn(usersResponsePage());
 
             //WHEN
@@ -201,7 +250,7 @@ public class UserControllerTest extends BaseControllerTest
                             containsInAnyOrder(toInt(USER_ID), toInt(OTHER_USER_ID))));
 
             verify(userService, times(1))
-                    .getUsers(any(UserFilter.class), eq(PAGEABLE));
+                    .getUsers(any(UserFilter.class), eq(USER_ID), eq(PAGEABLE));
 
             verifyNoMoreInteractions(userService);
         }
@@ -210,7 +259,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenNoFilters() throws Exception
         {
             //GIVEN
-            when(userService.getUsers(any(UserFilter.class), any(Pageable.class)))
+            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
                     .thenReturn(usersResponsePage());
 
             //WHEN
@@ -225,7 +274,7 @@ public class UserControllerTest extends BaseControllerTest
                             containsInAnyOrder(toInt(USER_ID), toInt(OTHER_USER_ID))));
 
             verify(userService, times(1))
-                    .getUsers(any(UserFilter.class), any(Pageable.class));
+                    .getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class));
 
             verifyNoMoreInteractions(userService);
         }
@@ -248,10 +297,26 @@ public class UserControllerTest extends BaseControllerTest
 
             verifyNoInteractions(userService);
         }
-    }
 
-    private static int toInt(Long value)
-    {
-        return Integer.parseInt(value.toString());
+        @Test
+        public void returns403_whenNoRights() throws Exception
+        {
+            //GIVEN
+            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
+                    .thenThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN));
+
+            //WHEN
+            mockMvc.perform(get("/users"))
+
+            //THEN
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.FORBIDDEN.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+
+            verify(userService, times(1))
+                    .getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class));
+
+            verifyNoMoreInteractions(userService);
+        }
     }
 }

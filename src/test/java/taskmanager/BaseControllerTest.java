@@ -39,4 +39,9 @@ public class BaseControllerTest
             return null;
         }).when(jwtAuthFilter).doFilter(any(), any(), any());
     }
+
+    protected int toInt(Long value)
+    {
+        return Integer.parseInt(value.toString());
+    }
 }

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import taskmanager.response.PageResponse;
@@ -38,22 +39,29 @@ public class UserController
 
     @GetMapping("/{id}")
     public UserResponse getUserById(
-            @PathVariable @Positive Long id)
+            @PathVariable @Positive Long id,
+            Authentication authentication)
     {
-        return userService.getUser(id);
+        Long currentUserId = (Long) authentication.getPrincipal();
+        return userService.getUser(id, currentUserId);
     }
 
     @GetMapping
     public PageResponse<UserResponse> getUsers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) @Past Instant fromCreationDate,
-            Pageable pageable)
+            @RequestParam(required = false) UserRole userRole,
+            Pageable pageable,
+            Authentication authentication)
     {
+        Long userId = (Long) authentication.getPrincipal();
+
         UserFilter filter = UserFilter.builder()
                 .name(name)
                 .fromCreationDate(fromCreationDate)
+                .userRole(userRole)
                 .build();
 
-        return new PageResponse<>(userService.getUsers(filter, pageable));
+        return new PageResponse<>(userService.getUsers(filter, userId, pageable));
     }
 }

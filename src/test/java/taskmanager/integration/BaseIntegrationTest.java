@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import taskmanager.auth.dto.LoginResponse;
 import taskmanager.project.dto.ProjectResponse;
-import taskmanager.task.dto.TaskResponse;
+import taskmanager.user.UserRole;
 import taskmanager.user.dto.UserResponse;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,7 +42,7 @@ public abstract class BaseIntegrationTest
     @BeforeEach
     void setUp() throws Exception
     {
-        userId = createUser(USER_NAME, PASSWORD);
+        userId = createUser(USER_NAME, PASSWORD, UserRole.USER);
         loginAndSetToken(USER_NAME, PASSWORD);
     }
 
@@ -133,23 +133,24 @@ public abstract class BaseIntegrationTest
         return mockMvc.perform(withAuth(get("/users")));
     }
 
-    protected Long createUser(String userName, String password) throws Exception
+    protected Long createUser(String userName, String password, UserRole role) throws Exception
     {
-        MvcResult mvcResult = postCreateUser(userName, password)
+        MvcResult mvcResult = postCreateUser(userName, password, role)
                 .andExpect(status().isCreated())
                 .andReturn();
 
         return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), UserResponse.class).id();
     }
 
-    protected ResultActions postCreateUser(String userName, String password) throws Exception
+    protected ResultActions postCreateUser(String userName, String password, UserRole role) throws Exception
     {
         String json = """
         {
           "name": "%s",
-          "password": "%s"
+          "password": "%s",
+          "role": "%s"
         }"""
-                .formatted(userName, password);
+                .formatted(userName, password, role);
 
         return mockMvc.perform(withAuth(post("/users"))
                 .contentType(MediaType.APPLICATION_JSON)

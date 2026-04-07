@@ -2,6 +2,7 @@ package taskmanager.user.filter;
 
 import lombok.Builder;
 import lombok.Getter;
+import taskmanager.user.UserRole;
 
 import java.time.Instant;
 
@@ -11,4 +12,5 @@ public class UserFilter
 {
     private final String name;
     private final Instant fromCreationDate;
+    private final UserRole userRole;
 }

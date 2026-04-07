@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import taskmanager.auth.AuthService;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
@@ -18,6 +19,7 @@ public class UserService
 {
     private final UserRepository userRepository;
     private final UserFinder userFinder;
+    private final AuthService authService;
     private final UserMapper mapper;
 
     @Transactional
@@ -28,18 +30,21 @@ public class UserService
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponse> getUsers(UserFilter filter, Pageable pageable)
+    public Page<UserResponse> getUsers(UserFilter filter, Long currentUserId, Pageable pageable)
     {
+        authService.verifyAdminRole(currentUserId);
+
         Specification<User> specification = UserSpecification.withFilter(filter);
 
         return userFinder
-                .getUsers(specification, pageable)
-                .map(mapper::toResponse);
+            .getUsers(specification, pageable)
+            .map(mapper::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getUser(Long id)
+    public UserResponse getUser(Long id, Long currentUserId)
     {
+        authService.verifyAdminRole(currentUserId);
         return mapper.toResponse(userFinder.getUser(id));
     }
 }

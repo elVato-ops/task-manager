@@ -6,8 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import taskmanager.auth.dto.LoginRequest;
 import taskmanager.auth.dto.LoginResponse;
+import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
+import taskmanager.user.UserRole;
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +31,13 @@ public class AuthService
 
         String token = jwtUtils.generateToken(user.getId(), user.getName());
         return new LoginResponse(token);
+    }
+
+    public void verifyAdminRole(Long userId)
+    {
+        if (!userRepository.existsByIdAndRole(userId, UserRole.ADMIN))
+        {
+            throw new ForbiddenAccessException(userId, UserRole.ADMIN);
+        }
     }
 }

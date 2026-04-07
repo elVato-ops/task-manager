@@ -38,6 +38,13 @@ public class GlobalExceptionHandler
         return response(e.getMessage(), null, UNAUTHORIZED);
     }
 
+    @ExceptionHandler(ForbiddenAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbiddenAccessException(ForbiddenAccessException e)
+    {
+        return response(e.getMessage(), null, FORBIDDEN);
+    }
+
     @ExceptionHandler({
             ConstraintViolationException.class,
             MethodArgumentNotValidException.class,
