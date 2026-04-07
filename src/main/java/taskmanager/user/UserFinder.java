@@ -27,4 +27,10 @@ public class UserFinder
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException(id, USER));
     }
+
+    public boolean existsByName(String name)
+    {
+        return userRepository
+                .existsByName(name);
+    }
 }

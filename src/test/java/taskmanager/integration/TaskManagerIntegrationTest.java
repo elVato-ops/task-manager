@@ -3,6 +3,7 @@ package taskmanager.integration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
+import taskmanager.exception.ErrorCode;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.UserRole;
@@ -88,6 +89,18 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.resource").value("USER"))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        public void returns409_whenNameInUse() throws Exception
+        {
+            //WHEN
+            postCreateUser(USER_NAME, PASSWORD, UserRole.ADMIN)
+
+            //THEN
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.USERNAME_CONFLICT.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
     }

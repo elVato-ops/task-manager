@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import taskmanager.auth.AuthService;
+import taskmanager.exception.NameInUseException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
@@ -25,6 +26,11 @@ public class UserService
     @Transactional
     public UserResponse createUser(CreateUserRequest request)
     {
+        if (userFinder.existsByName(request.name()))
+        {
+            throw new NameInUseException(request.name());
+        }
+
         User user = userRepository.save(mapper.toEntity(request));
         return mapper.toResponse(user);
     }

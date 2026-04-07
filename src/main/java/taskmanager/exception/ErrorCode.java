@@ -6,5 +6,6 @@ public enum ErrorCode
     NOT_FOUND,
     REQUEST_INVALID,
     UNAUTHORIZED,
-    FORBIDDEN
+    FORBIDDEN,
+    USERNAME_CONFLICT
 }

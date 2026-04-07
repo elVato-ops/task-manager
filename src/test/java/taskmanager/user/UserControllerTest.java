@@ -8,10 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import taskmanager.BaseControllerTest;
-import taskmanager.exception.ErrorCode;
-import taskmanager.exception.ForbiddenAccessException;
-import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
+import taskmanager.exception.*;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.filter.UserFilter;
 import taskmanager.utils.WithMockUserId;
@@ -138,6 +135,34 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(status().isBadRequest());
 
             verifyNoInteractions(userService);
+        }
+
+        @Test
+        public void returns403_whenNameInUse() throws Exception
+        {
+            //GIVEN
+            String json = """
+            {
+              "name": "Bobek",
+              "password": "password",
+              "role": "USER"
+            }""";
+
+            when(userService.createUser(any(CreateUserRequest.class)))
+                    .thenThrow(NameInUseException.class);
+
+            //WHEN
+            mockMvc.perform(post(URI.create("/users"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(json))
+
+            //THEN
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.USERNAME_CONFLICT.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+
+            verify(userService, times(1)).createUser(any(CreateUserRequest.class));
+            verifyNoMoreInteractions(userService);
         }
     }
 

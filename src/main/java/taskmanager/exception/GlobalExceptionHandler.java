@@ -45,6 +45,13 @@ public class GlobalExceptionHandler
         return response(e.getMessage(), null, FORBIDDEN);
     }
 
+    @ExceptionHandler(NameInUseException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleForbiddenAccessException(NameInUseException e)
+    {
+        return response(e.getMessage(), null, USERNAME_CONFLICT);
+    }
+
     @ExceptionHandler({
             ConstraintViolationException.class,
             MethodArgumentNotValidException.class,

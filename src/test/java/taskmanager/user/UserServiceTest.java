@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import taskmanager.auth.AuthService;
 import taskmanager.exception.ForbiddenAccessException;
+import taskmanager.exception.NameInUseException;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
 import taskmanager.utils.UserMapper;
@@ -53,6 +54,7 @@ public class UserServiceTest
         public void returnsUser_whenSuccess()
         {
             //GIVEN
+            when(userFinder.existsByName(USER_NAME)).thenReturn(false);
             when(userRepository.save(any(User.class))).thenReturn(user());
             when(passwordEncoder.encode(any())).thenReturn("encoded-password");
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -69,6 +71,23 @@ public class UserServiceTest
             assertEquals("encoded-password", user.getPassword());
 
             assertEquals(createUserRequest().name(), userResponse.name());
+        }
+
+        @Test
+        public void throws409_whenNameInUse()
+        {
+            //GIVEN
+            when(userFinder.existsByName(USER_NAME))
+                    .thenReturn(true);
+
+            //WHEN
+            assertThrows(NameInUseException.class,
+                    () -> userService.createUser(createUserRequest()));
+
+            //THEN
+            verify(userFinder, times(1)).existsByName(USER_NAME);
+            verifyNoMoreInteractions(userFinder);
+            verifyNoInteractions(userRepository);
         }
     }
 
