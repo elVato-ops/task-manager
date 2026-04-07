@@ -1,15 +1,15 @@
 package taskmanager.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Schema(description = "Paginated response")
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
 public class PageResponse<T>
 {
     public PageResponse(Page<T> page)

@@ -107,14 +107,14 @@ public class ProjectFinderTest
         public void returnsTrue_whenExists()
         {
             //GIVEN
-            when(projectRepository.existsById(USER_ID)).thenReturn(true);
+            when(projectRepository.existsById(PROJECT_ID)).thenReturn(true);
 
             //WHEN
-            boolean result = projectFinder.existsById(USER_ID);
+            boolean result = projectFinder.existsById(PROJECT_ID);
 
             //THEN
             verify(projectRepository, times(1))
-                    .existsById(USER_ID);
+                    .existsById(PROJECT_ID);
 
             verifyNoMoreInteractions(projectRepository);
 

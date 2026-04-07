@@ -67,6 +67,7 @@ public class TaskService
                         .map(taskMapper::toResponse);
     }
 
+    @Transactional
     public TaskResponse updateStatus(Long id, TaskStatus status)
     {
         Task task = taskRepository.findById(id)

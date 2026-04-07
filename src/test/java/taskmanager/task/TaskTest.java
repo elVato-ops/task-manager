@@ -17,7 +17,7 @@ public class TaskTest
         assertEquals(TASK, e.getResource());
         assertEquals("Task name must not be empty", e.getMessage());
 
-        e = assertThrows(ValidationException.class, () -> new Task("", TASK_STATUS, project(), user()));
+        e = assertThrows(ValidationException.class, () -> new Task(null, TASK_STATUS, project(), user()));
         assertEquals(TASK, e.getResource());
         assertEquals("Task name must not be empty", e.getMessage());
 
