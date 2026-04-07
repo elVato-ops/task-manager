@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
+import taskmanager.exception.ValidationException;
 import taskmanager.project.ProjectFinder;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
@@ -16,10 +16,14 @@ import taskmanager.task.filter.TaskFilter;
 import taskmanager.user.UserFinder;
 import taskmanager.utils.TaskMapper;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.exception.ResourceType.USER;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskServiceTest
@@ -124,7 +128,7 @@ public class TaskServiceTest
             CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME);
 
             when(projectFinder.getProject(PROJECT_ID))
-                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN /THEN
             assertThrows(NotFoundException.class,
@@ -144,7 +148,7 @@ public class TaskServiceTest
                     .thenReturn(project());
 
             when(userFinder.getUser(USER_ID))
-                    .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
+                    .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN /THEN
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
@@ -156,7 +160,7 @@ public class TaskServiceTest
             verifyNoMoreInteractions(userFinder);
             verifyNoInteractions(taskRepository);
 
-            assertEquals(ResourceType.USER, notFoundException.getResource());
+            assertEquals(USER, notFoundException.getResource());
             assertEquals(USER_ID, notFoundException.getId());
         }
     }
@@ -207,7 +211,7 @@ public class TaskServiceTest
             verifyNoInteractions(taskRepository);
 
             assertEquals(PROJECT_ID, exception.getId());
-            assertEquals(ResourceType.PROJECT, exception.getResource());
+            assertEquals(PROJECT, exception.getResource());
         }
     }
 
@@ -237,6 +241,67 @@ public class TaskServiceTest
             assertEquals(task().getName(), taskResponse.name());
             assertEquals(task().getProject().getId(), taskResponse.projectId());
             assertEquals(task().getAssignee().getId(), taskResponse.assigneeId());
+        }
+    }
+
+    @Nested
+    class UpdateTask
+    {
+        @Test
+        public void returnsUpdatedTask_whenSuccess()
+        {
+            //GIVEN
+            when(taskRepository.findById(TASK_ID))
+                    .thenReturn(Optional.of(task()));
+
+            when(taskRepository.save(any(Task.class)))
+                    .thenReturn(updatedTask());
+
+            //WHEN
+            TaskResponse task = taskService.updateStatus(TASK_ID, NEW_TASK_STATUS);
+
+            //THEN
+            verify(taskRepository, times(1)).findById(TASK_ID);
+            verify(taskRepository, times(1)).save(any(Task.class));
+            verifyNoMoreInteractions(taskRepository);
+
+            assertEquals(updatedTask().getId(), task.id());
+            assertEquals(updatedTask().getName(), task.name());
+            assertEquals(updatedTask().getProject().getId(), task.projectId());
+            assertEquals(updatedTask().getAssignee().getId(), task.assigneeId());
+            assertEquals(updatedTask().getStatus(), task.status());
+        }
+
+        @Test
+        public void throws400_whenNullStatus()
+        {
+            //GIVEN
+            when(taskRepository.findById(TASK_ID))
+                    .thenReturn(Optional.of(task()));
+
+            //WHEN
+            assertThrows(ValidationException.class,
+                    () -> taskService.updateStatus(TASK_ID, null));
+
+            //THEN
+            verify(taskRepository, times(1)).findById(TASK_ID);
+            verifyNoMoreInteractions(taskRepository);
+        }
+
+        @Test
+        public void throws404_whenNotExists()
+        {
+            //GIVEN
+            when(taskRepository.findById(TASK_ID))
+                    .thenReturn(Optional.empty());
+
+            //WHEN
+            assertThrows(NotFoundException.class,
+                    () -> taskService.updateStatus(TASK_ID, NEW_TASK_STATUS));
+
+            //THEN
+            verify(taskRepository, times(1)).findById(TASK_ID);
+            verifyNoMoreInteractions(taskRepository);
         }
     }
 }

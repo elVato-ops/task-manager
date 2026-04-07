@@ -8,7 +8,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import taskmanager.BaseControllerTest;
-import taskmanager.exception.*;
+import taskmanager.exception.ForbiddenAccessException;
+import taskmanager.exception.NameInUseException;
+import taskmanager.exception.NotFoundException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.filter.UserFilter;
 import taskmanager.utils.WithMockUserId;
@@ -23,6 +25,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ErrorCode.*;
+import static taskmanager.exception.ResourceType.USER;
+import static taskmanager.user.UserRole.ADMIN;
 
 @WebMvcTest(UserController.class)
 @WithMockUserId
@@ -158,7 +163,7 @@ public class UserControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.USERNAME_CONFLICT.toString()))
+                    .andExpect(jsonPath("$.errorCode").value(USERNAME_CONFLICT.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(userService, times(1)).createUser(any(CreateUserRequest.class));
@@ -198,7 +203,7 @@ public class UserControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(userService);
@@ -209,14 +214,14 @@ public class UserControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(userService.getUser(OTHER_USER_ID, USER_ID))
-                    .thenThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN));
+                    .thenThrow(new ForbiddenAccessException(USER_ID, ADMIN));
 
             //WHEN
             mockMvc.perform(get("/users/" + OTHER_USER_ID))
 
             //THEN
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.FORBIDDEN.toString()))
+                    .andExpect(jsonPath("$.errorCode").value(FORBIDDEN.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(userService, times(1)).getUser(OTHER_USER_ID, USER_ID);
@@ -228,15 +233,15 @@ public class UserControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(userService.getUser(USER_ID, USER_ID))
-                    .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
+                    .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN
             mockMvc.perform(get("/users/" + USER_ID))
 
             //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.resource").value("USER"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
+                    .andExpect(jsonPath("$.resource").value(USER.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(userService, times(1)).getUser(USER_ID, USER_ID);
@@ -317,7 +322,7 @@ public class UserControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(userService);
@@ -328,14 +333,14 @@ public class UserControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
-                    .thenThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN));
+                    .thenThrow(new ForbiddenAccessException(USER_ID, ADMIN));
 
             //WHEN
             mockMvc.perform(get("/users"))
 
             //THEN
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.FORBIDDEN.toString()))
+                    .andExpect(jsonPath("$.errorCode").value(FORBIDDEN.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(userService, times(1))

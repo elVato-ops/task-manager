@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
 import taskmanager.user.filter.UserFilter;
 import taskmanager.user.specification.UserSpecification;
 
@@ -19,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ResourceType.USER;
 
 @ExtendWith(MockitoExtension.class)
 public class UserFinderTest
@@ -88,7 +88,7 @@ public class UserFinderTest
             verify(userRepository, times(1)).findById(USER_ID);
             verifyNoMoreInteractions(userRepository);
 
-            assertEquals(ResourceType.USER, notFoundException.getResource());
+            assertEquals(USER, notFoundException.getResource());
             assertEquals(USER_ID, notFoundException.getId());
         }
     }

@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.PASSWORD;
 import static taskmanager.TestConstants.USER_NAME;
+import static taskmanager.user.UserRole.USER;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,7 +43,7 @@ public abstract class BaseIntegrationTest
     @BeforeEach
     void setUp() throws Exception
     {
-        userId = createUser(USER_NAME, PASSWORD, UserRole.USER);
+        userId = createUser(USER_NAME, PASSWORD, USER);
         loginAndSetToken(USER_NAME, PASSWORD);
     }
 

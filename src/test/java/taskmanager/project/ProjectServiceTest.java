@@ -7,7 +7,6 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.user.UserFinder;
@@ -18,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.exception.ResourceType.USER;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectServiceTest
@@ -71,7 +72,7 @@ public class ProjectServiceTest
         {
             //GIVEN
             when(userFinder.getUser(USER_ID))
-                    .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
+                    .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN / THEN
             assertThrows(NotFoundException.class,
@@ -110,7 +111,7 @@ public class ProjectServiceTest
         {
             //GIVEN
             when(projectFinder.getProject(PROJECT_ID))
-                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN /THEN
             NotFoundException exception = assertThrows(NotFoundException.class,
@@ -120,7 +121,7 @@ public class ProjectServiceTest
             verifyNoMoreInteractions(projectFinder);
 
             assertEquals(project().getId(), exception.getId());
-            assertEquals(ResourceType.PROJECT, exception.getResource());
+            assertEquals(PROJECT, exception.getResource());
         }
     }
 

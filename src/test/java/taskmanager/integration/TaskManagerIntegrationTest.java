@@ -3,15 +3,17 @@ package taskmanager.integration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MvcResult;
-import taskmanager.exception.ErrorCode;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.task.dto.TaskResponse;
-import taskmanager.user.UserRole;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ErrorCode.*;
+import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.user.UserRole.ADMIN;
+import static taskmanager.user.UserRole.USER;
 
 public class TaskManagerIntegrationTest extends BaseIntegrationTest
 {
@@ -22,7 +24,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUser_whenSuccess() throws Exception
         {
             //WHEN
-            createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            createUser(OTHER_USER_NAME, PASSWORD, ADMIN);
             loginAndSetToken(OTHER_USER_NAME, PASSWORD);
             getUser(userId)
 
@@ -36,7 +38,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returnsUsers_whenGetAll() throws Exception
         {
             //GIVEN
-            Long otherUserId = createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            Long otherUserId = createUser(OTHER_USER_NAME, PASSWORD, ADMIN);
             loginAndSetToken(OTHER_USER_NAME, PASSWORD);
 
             //WHEN
@@ -56,11 +58,11 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns400_whenNameEmpty() throws Exception
         {
             //WHEN
-            postCreateUser("", PASSWORD, UserRole.USER)
+            postCreateUser("", PASSWORD, USER)
 
-            //THEN
+                    //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
 
@@ -72,7 +74,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
 
             //THEN
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.errorCode").value(FORBIDDEN.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
 
@@ -80,15 +82,15 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns404_whenUserNotExists() throws Exception
         {
             //WHEN
-            createUser(OTHER_USER_NAME, PASSWORD, UserRole.ADMIN);
+            createUser(OTHER_USER_NAME, PASSWORD, ADMIN);
             loginAndSetToken(OTHER_USER_NAME, PASSWORD);
 
             getUser(997L)
 
             //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.resource").value("USER"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
+                    .andExpect(jsonPath("$.resource").value(USER.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
 
@@ -96,11 +98,11 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns409_whenNameInUse() throws Exception
         {
             //WHEN
-            postCreateUser(USER_NAME, PASSWORD, UserRole.ADMIN)
+            postCreateUser(USER_NAME, PASSWORD, ADMIN)
 
             //THEN
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.errorCode").value(ErrorCode.USERNAME_CONFLICT.toString()))
+                    .andExpect(jsonPath("$.errorCode").value(USERNAME_CONFLICT.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
     }
@@ -141,7 +143,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
 
@@ -153,8 +155,8 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
 
                     //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.resource").value("PROJECT"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
+                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
     }
@@ -237,7 +239,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
         }
     }

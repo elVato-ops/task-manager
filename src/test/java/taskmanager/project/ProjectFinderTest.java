@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.project.specification.ProjectSpecification;
 
@@ -18,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ResourceType.PROJECT;
 
 @ExtendWith(MockitoExtension.class)
 public class ProjectFinderTest
@@ -64,7 +64,7 @@ public class ProjectFinderTest
             verify(projectRepository, times(1)).findById(PROJECT_ID);
             verifyNoMoreInteractions(projectRepository);
 
-            assertEquals(ResourceType.PROJECT, notFoundException.getResource());
+            assertEquals(PROJECT, notFoundException.getResource());
             assertEquals(PROJECT_ID, notFoundException.getId());
         }
     }

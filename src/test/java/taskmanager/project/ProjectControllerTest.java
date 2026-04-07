@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import taskmanager.BaseControllerTest;
 import taskmanager.config.TestSecurityConfig;
 import taskmanager.exception.NotFoundException;
-import taskmanager.exception.ResourceType;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.task.TaskService;
@@ -24,6 +23,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ErrorCode.NOT_FOUND;
+import static taskmanager.exception.ErrorCode.REQUEST_INVALID;
+import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.exception.ResourceType.USER;
 
 @WebMvcTest(ProjectController.class)
 @WithMockUserId
@@ -66,7 +69,7 @@ public class ProjectControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(projectService);
@@ -77,15 +80,15 @@ public class ProjectControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(projectService.getProject(PROJECT_ID))
-                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN
             mockMvc.perform(get("/projects/" + PROJECT_ID))
 
                     //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
-                    .andExpect(jsonPath("$.resource").value("PROJECT"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
+                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(projectService, times(1)).getProject(PROJECT_ID);
@@ -202,7 +205,7 @@ public class ProjectControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(projectService);
@@ -264,7 +267,7 @@ public class ProjectControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(taskService);
@@ -280,7 +283,7 @@ public class ProjectControllerTest extends BaseControllerTest
             }""";
 
             when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
-                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN
             mockMvc.perform(post("/projects/" + PROJECT_ID + "/tasks")
@@ -289,9 +292,9 @@ public class ProjectControllerTest extends BaseControllerTest
 
                     //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
                     .andExpect(jsonPath("$.timestamp").exists())
-                    .andExpect(jsonPath("$.resource").value(ResourceType.PROJECT.toString()))
+                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
                     .andExpect(jsonPath("$.message").value("PROJECT with id " + PROJECT_ID + " not found"));
         }
 
@@ -305,7 +308,7 @@ public class ProjectControllerTest extends BaseControllerTest
             }""";
 
             when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
-                    .thenThrow(new NotFoundException(USER_ID, ResourceType.USER));
+                    .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN
             mockMvc.perform(post("/projects/" + PROJECT_ID + "/tasks")
@@ -314,9 +317,9 @@ public class ProjectControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
                     .andExpect(jsonPath("$.timestamp").exists())
-                    .andExpect(jsonPath("$.resource").value(ResourceType.USER.toString()))
+                    .andExpect(jsonPath("$.resource").value(USER.toString()))
                     .andExpect(jsonPath("$.message").value("USER with id " + USER_ID + " not found"));
         }
     }
@@ -362,7 +365,7 @@ public class ProjectControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(taskService);
@@ -373,16 +376,16 @@ public class ProjectControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(taskService.getTasks(eq(PROJECT_ID), any(Pageable.class)))
-                    .thenThrow(new NotFoundException(PROJECT_ID, ResourceType.PROJECT));
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN
             mockMvc.perform(get("/projects/" + PROJECT_ID + "/tasks"))
 
             //THEN
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
                     .andExpect(jsonPath("$.timestamp").exists())
-                    .andExpect(jsonPath("$.resource").value(ResourceType.PROJECT.toString()))
+                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
                     .andExpect(jsonPath("$.message").value("PROJECT with id " + PROJECT_ID + " not found"));
 
             verify(taskService, times(1)).getTasks(eq(PROJECT_ID), any(Pageable.class));

@@ -63,4 +63,13 @@ public class Task
     {
         throw new ValidationException(message, TASK);
     }
+
+    public void updateStatus(TaskStatus status)
+    {
+        if (status != null)
+        {
+            this.status = status;
+        }
+        else throwValidation("Task status must not be null");
+    }
 }

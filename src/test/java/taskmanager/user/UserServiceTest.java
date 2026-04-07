@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.user.UserRole.ADMIN;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest
@@ -130,7 +131,7 @@ public class UserServiceTest
             //GIVEN
             UserFilter filter = UserFilter.builder().build();
 
-            doThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN))
+            doThrow(new ForbiddenAccessException(USER_ID, ADMIN))
                     .when(authService).verifyAdminRole(USER_ID);
 
             //WHEN
@@ -178,7 +179,7 @@ public class UserServiceTest
         public void throwsForbiddenAccessException_whenUserHasNoRights()
         {
             //GIVEN
-            doThrow(new ForbiddenAccessException(USER_ID, UserRole.ADMIN))
+            doThrow(new ForbiddenAccessException(USER_ID, ADMIN))
                     .when(authService).verifyAdminRole(OTHER_USER_ID);
 
             //WHEN

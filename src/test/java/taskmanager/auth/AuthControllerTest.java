@@ -15,6 +15,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ErrorCode.REQUEST_INVALID;
+import static taskmanager.exception.ErrorCode.UNAUTHORIZED;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends BaseControllerTest
@@ -70,7 +72,7 @@ public class AuthControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(authService);
@@ -94,7 +96,7 @@ public class AuthControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value("REQUEST_INVALID"))
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(authService);
@@ -121,7 +123,7 @@ public class AuthControllerTest extends BaseControllerTest
 
             //THEN
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.errorCode").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.errorCode").value(UNAUTHORIZED.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(authService, times(1)).login(any(LoginRequest.class));

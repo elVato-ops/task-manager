@@ -22,6 +22,8 @@ import taskmanager.user.dto.UserResponse;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static taskmanager.user.UserRole.USER;
+
 public class TestConstants
 {
     public static final String USER_NAME = "Bobek";
@@ -40,7 +42,8 @@ public class TestConstants
     public static final long EXPIRATION = 86400000;
 
     public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
-    public static final UserRole USER_ROLE = UserRole.USER;
+    public static final TaskStatus NEW_TASK_STATUS = TaskStatus.IN_PROGRESS;
+    public static final UserRole USER_ROLE = USER;
 
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
@@ -127,6 +130,18 @@ public class TestConstants
         return task;
     }
 
+    @SneakyThrows
+    public static Task updatedTask()
+    {
+        Task task = new Task(TASK_NAME, NEW_TASK_STATUS, project(), user());
+
+        Field field = Task.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(task, TASK_ID);
+
+        return task;
+    }
+
     public static CreateTaskRequest createTaskRequest()
     {
         return new CreateTaskRequest(TASK_NAME);
@@ -140,6 +155,11 @@ public class TestConstants
     public static TaskResponse taskResponse()
     {
         return new TaskResponse(TASK_ID, TASK_NAME, TASK_STATUS, PROJECT_ID, USER_ID);
+    }
+
+    public static TaskResponse updatedTaskResponse()
+    {
+        return new TaskResponse(TASK_ID, TASK_NAME, NEW_TASK_STATUS, PROJECT_ID, USER_ID);
     }
 
     public static Page<TaskResponse> taskResponsePage()

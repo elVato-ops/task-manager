@@ -18,6 +18,7 @@ import taskmanager.user.UserFinder;
 import taskmanager.utils.TaskMapper;
 
 import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.exception.ResourceType.TASK;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +65,16 @@ public class TaskService
 
         return taskRepository.findByProjectId(projectId, pageable)
                         .map(taskMapper::toResponse);
+    }
+
+    public TaskResponse updateStatus(Long id, TaskStatus status)
+    {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id, TASK));
+
+        task.updateStatus(status);
+
+        return taskMapper.toResponse(
+                taskRepository.save(task));
     }
 }
