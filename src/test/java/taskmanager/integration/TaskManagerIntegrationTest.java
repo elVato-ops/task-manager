@@ -229,6 +229,25 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         }
 
         @Test
+        public void returnsUpdatedTask_whenUpdated() throws Exception
+        {
+            //GIVEN
+            Long projectId = createProject(PROJECT_NAME);
+            Long taskId = createTask(TASK_NAME, projectId);
+
+            //WHEN
+            patchUpdateTask(taskId, NEW_TASK_STATUS)
+
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value(TASK_NAME))
+                    .andExpect(jsonPath("$.status").value(NEW_TASK_STATUS.toString()))
+                    .andExpect(jsonPath("$.projectId").value(projectId))
+                    .andExpect(jsonPath("$.assigneeId").value(userId));
+
+        }
+
+        @Test
         public void returns400_whenNameEmpty() throws Exception
         {
             //GIVEN

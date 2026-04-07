@@ -14,11 +14,12 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import taskmanager.auth.dto.LoginResponse;
 import taskmanager.project.dto.ProjectResponse;
+import taskmanager.task.TaskStatus;
+import taskmanager.task.dto.TaskResponse;
 import taskmanager.user.UserRole;
 import taskmanager.user.dto.UserResponse;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.PASSWORD;
 import static taskmanager.TestConstants.USER_NAME;
@@ -78,10 +79,27 @@ public abstract class BaseIntegrationTest
         return mockMvc.perform(withAuth(get("/projects/" + projectId + "/tasks")));
     }
 
-    protected void createTask(String name, Long projectId) throws Exception
+    protected ResultActions patchUpdateTask(Long id, TaskStatus taskStatus) throws Exception
     {
-        postCreateTask(name, projectId)
-                .andExpect(status().isCreated());
+        String json = """
+        {
+          "id": "%s",
+          "status": "%s"
+        }"""
+                .formatted(id, taskStatus);
+
+        return mockMvc.perform(withAuth(patch("/tasks/" + id + "/status/" + taskStatus))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json));
+    }
+
+    protected Long createTask(String name, Long projectId) throws Exception
+    {
+        MvcResult mvcResult = postCreateTask(name, projectId)
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TaskResponse.class).id();
     }
 
     protected ResultActions postCreateTask(String name, Long projectId) throws Exception
