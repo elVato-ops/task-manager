@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static taskmanager.TestConstants.*;
 import static taskmanager.exception.ErrorCode.*;
 import static taskmanager.exception.ResourceType.USER;
-import static taskmanager.user.UserRole.ADMIN;
 
 @WebMvcTest(UserController.class)
 @WithMockUserId
@@ -214,7 +213,7 @@ public class UserControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(userService.getUser(OTHER_USER_ID, USER_ID))
-                    .thenThrow(new ForbiddenAccessException(USER_ID, ADMIN));
+                    .thenThrow(ForbiddenAccessException.class);
 
             //WHEN
             mockMvc.perform(get("/users/" + OTHER_USER_ID))
@@ -333,7 +332,7 @@ public class UserControllerTest extends BaseControllerTest
         {
             //GIVEN
             when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
-                    .thenThrow(new ForbiddenAccessException(USER_ID, ADMIN));
+                    .thenThrow(ForbiddenAccessException.class);
 
             //WHEN
             mockMvc.perform(get("/users"))

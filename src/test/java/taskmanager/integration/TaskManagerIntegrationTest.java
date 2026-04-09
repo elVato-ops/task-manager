@@ -171,7 +171,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
             Long projectId = createProject(PROJECT_NAME);
 
             //WHEN
-            MvcResult result = postCreateTask(TASK_NAME, projectId)
+            MvcResult result = postCreateTask(TASK_NAME, projectId, userId)
 
             //THEN
                     .andExpect(status().isCreated())
@@ -213,8 +213,8 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         {
             //GIVEN
             Long projectId = createProject(PROJECT_NAME);
-            createTask(TASK_NAME, projectId);
-            createTask(OTHER_TASK_NAME, projectId);
+            createTask(TASK_NAME, projectId, userId);
+            createTask(OTHER_TASK_NAME, projectId, userId);
 
             //WHEN
             getTasksWithFilter(TASK_NAME)
@@ -233,7 +233,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         {
             //GIVEN
             Long projectId = createProject(PROJECT_NAME);
-            Long taskId = createTask(TASK_NAME, projectId);
+            Long taskId = createTask(TASK_NAME, projectId, userId);
 
             //WHEN
             patchUpdateTask(taskId, NEW_TASK_STATUS)
@@ -254,7 +254,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
             Long projectId = createProject(PROJECT_NAME);
 
             //WHEN
-            postCreateTask("", projectId)
+            postCreateTask("", projectId, userId)
 
             //THEN
                     .andExpect(status().isBadRequest())

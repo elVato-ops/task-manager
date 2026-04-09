@@ -93,22 +93,23 @@ public abstract class BaseIntegrationTest
                 .content(json));
     }
 
-    protected Long createTask(String name, Long projectId) throws Exception
+    protected Long createTask(String name, Long projectId, Long assigneeId) throws Exception
     {
-        MvcResult mvcResult = postCreateTask(name, projectId)
+        MvcResult mvcResult = postCreateTask(name, projectId, assigneeId)
                 .andExpect(status().isCreated())
                 .andReturn();
 
         return objectMapper.readValue(mvcResult.getResponse().getContentAsString(), TaskResponse.class).id();
     }
 
-    protected ResultActions postCreateTask(String name, Long projectId) throws Exception
+    protected ResultActions postCreateTask(String name, Long projectId, Long assigneeId) throws Exception
     {
         String json = """
         {
-          "name": "%s"
+          "name": "%s",
+          "assigneeId": "%s"
         }"""
-                .formatted(name);
+                .formatted(name, assigneeId);
 
         return mockMvc.perform(withAuth(post("/projects/" + projectId + "/tasks"))
                 .contentType(MediaType.APPLICATION_JSON)

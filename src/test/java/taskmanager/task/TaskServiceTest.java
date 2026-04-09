@@ -7,10 +7,11 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import taskmanager.auth.AuthService;
+import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NotFoundException;
 import taskmanager.exception.ValidationException;
 import taskmanager.project.ProjectFinder;
-import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.task.filter.TaskFilter;
 import taskmanager.user.UserFinder;
@@ -39,6 +40,9 @@ public class TaskServiceTest
 
     @Mock
     private ProjectFinder projectFinder;
+
+    @Mock
+    private AuthService authService;
 
     @Spy
     private TaskMapper taskMapper;
@@ -89,35 +93,37 @@ public class TaskServiceTest
         public void returnsTask_whenNullUserId()
         {
             //GIVEN
-            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME);
-
             when(projectFinder.getProject(PROJECT_ID))
                     .thenReturn(project());
 
+            when(userFinder.getUser(USER_ID))
+                    .thenReturn(user());
+
             when(taskRepository.save(any(Task.class)))
-                    .thenReturn(new Task(TASK_NAME, TASK_STATUS, project(), null));
+                    .thenReturn(new Task(TASK_NAME, TASK_STATUS, project(), user()));
 
             ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
 
             //WHEN
-            TaskResponse task = taskService.createTask(createTaskRequest, PROJECT_ID, null);
+            TaskResponse task = taskService.createTask(createTaskRequest(), PROJECT_ID, USER_ID);
 
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
-            verifyNoInteractions(userFinder);
+            verify(userFinder, times(1)).getUser(USER_ID);
+            verifyNoMoreInteractions(projectFinder);
             verify(taskRepository, times(1)).save(captor.capture());
             verifyNoMoreInteractions(taskRepository);
 
             Task value = captor.getValue();
             assertEquals(TASK_NAME, value.getName());
             assertEquals(TASK_STATUS, value.getStatus());
-            assertNull(value.getAssignee());
+            assertEquals(USER_ID, value.getAssignee().getId());
             assertEquals(PROJECT_ID, value.getProject().getId());
 
             assertEquals(TASK_NAME, task.name());
             assertEquals(TASK_STATUS, task.status());
-            assertNull(task.assigneeId());
+            assertEquals(USER_ID, task.assigneeId());
             assertEquals(project().getId(), task.projectId());
         }
 
@@ -125,14 +131,12 @@ public class TaskServiceTest
         public void throwsNotFoundException_whenProjectNotExists()
         {
             //GIVEN
-            CreateTaskRequest createTaskRequest = new CreateTaskRequest(TASK_NAME);
-
             when(projectFinder.getProject(PROJECT_ID))
                     .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN /THEN
             assertThrows(NotFoundException.class,
-                    () -> taskService.createTask(createTaskRequest, PROJECT_ID, USER_ID));
+                    () -> taskService.createTask(createTaskRequest(), PROJECT_ID, USER_ID));
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
@@ -162,6 +166,66 @@ public class TaskServiceTest
 
             assertEquals(USER, notFoundException.getResource());
             assertEquals(USER_ID, notFoundException.getId());
+        }
+
+        @Test
+        public void throwsForbiddenAccessException_whenNotProjectOwnerNotAdmin()
+        {
+            //GIVEN
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenReturn(project());
+
+            doThrow(ForbiddenAccessException.class)
+                    .when(authService).verifyAdminRole(OTHER_USER_ID);
+
+            //WHEN /THEN
+            assertThrows(ForbiddenAccessException.class,
+                    () -> taskService.createTask(createTaskRequest(), PROJECT_ID, OTHER_USER_ID));
+
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
+            verify(authService, times(1)).verifyAdminRole(OTHER_USER_ID);
+            verifyNoMoreInteractions(authService);
+            verifyNoInteractions(userFinder);
+            verifyNoInteractions(taskRepository);
+        }
+
+        @Test
+        public void returnsTask_whenNotProjectOwnerButAdmin()
+        {
+            //GIVEN
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenReturn(project());
+
+            when(userFinder.getUser(USER_ID))
+                    .thenReturn(user());
+
+            when(taskRepository.save(any(Task.class)))
+                    .thenReturn(new Task(TASK_NAME, TASK_STATUS, project(), user()));
+
+            ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
+
+            //WHEN
+            TaskResponse task = taskService.createTask(createTaskRequest(), PROJECT_ID, OTHER_USER_ID);
+
+            //THEN
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
+            verify(userFinder, times(1)).getUser(USER_ID);
+            verifyNoMoreInteractions(userFinder);
+            verify(taskRepository, times(1)).save(captor.capture());
+            verifyNoMoreInteractions(taskRepository);
+
+            Task value = captor.getValue();
+            assertEquals(TASK_NAME, value.getName());
+            assertEquals(TASK_STATUS, value.getStatus());
+            assertEquals(user().getId(), value.getAssignee().getId());
+            assertEquals(project().getId(), value.getProject().getId());
+
+            assertEquals(TASK_NAME, task.name());
+            assertEquals(TASK_STATUS, task.status());
+            assertEquals(user().getId(), task.assigneeId());
+            assertEquals(project().getId(), task.projectId());
         }
     }
 

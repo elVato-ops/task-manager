@@ -144,7 +144,7 @@ public class TestConstants
 
     public static CreateTaskRequest createTaskRequest()
     {
-        return new CreateTaskRequest(TASK_NAME);
+        return new CreateTaskRequest(TASK_NAME, USER_ID);
     }
 
     public static Page<Task> tasksPage()

@@ -9,7 +9,8 @@ import taskmanager.auth.dto.LoginResponse;
 import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
-import taskmanager.user.UserRole;
+
+import static taskmanager.user.UserRole.ADMIN;
 
 @Service
 @RequiredArgsConstructor
@@ -35,9 +36,9 @@ public class AuthService
 
     public void verifyAdminRole(Long userId)
     {
-        if (!userRepository.existsByIdAndRole(userId, UserRole.ADMIN))
+        if (!userRepository.existsByIdAndRole(userId, ADMIN))
         {
-            throw new ForbiddenAccessException(userId, UserRole.ADMIN);
+            throw new ForbiddenAccessException("User " + userId + " has no " + ADMIN + " rights");
         }
     }
 }

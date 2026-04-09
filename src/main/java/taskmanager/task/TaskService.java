@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import taskmanager.auth.AuthService;
 import taskmanager.exception.NotFoundException;
 import taskmanager.project.Project;
 import taskmanager.project.ProjectFinder;
@@ -27,18 +28,19 @@ public class TaskService
     private final TaskRepository taskRepository;
     private final UserFinder userFinder;
     private final ProjectFinder projectFinder;
+    private final AuthService authService;
     private final TaskMapper taskMapper;
 
     @Transactional
-    public TaskResponse createTask(CreateTaskRequest request, Long projectId, Long userId)
+    public TaskResponse createTask(CreateTaskRequest request, Long projectId, Long currentUserId)
     {
         Project project = projectFinder.getProject(projectId);
-
-        User user = null;
-        if (userId != null)
+        if (!project.getOwner().getId().equals(currentUserId))
         {
-            user = userFinder.getUser(userId);
+            authService.verifyAdminRole(currentUserId);
         }
+
+        User user = userFinder.getUser(request.assigneeId());
 
         return taskMapper.toResponse(
                 taskRepository
