@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import taskmanager.user.UserRole;
 
 import java.lang.reflect.Field;
 
@@ -36,17 +37,19 @@ public class JwtUtilsTest
         public void returnsToken_whenSuccess()
         {
             //GIVEN
-            String token = jwtUtils.generateToken(USER_ID, USER_NAME);
+            String token = jwtUtils.generateToken(USER_ID, USER_NAME, USER_ROLE);
 
             //WHEN
             Long userId = jwtUtils.extractUserId(token);
             String userName = jwtUtils.extractUsername(token);
+            UserRole userRole = jwtUtils.extractUserRole(token);
             boolean isValid = jwtUtils.isTokenValid(token);
 
             //THEN
             assertTrue(isValid);
             assertEquals(USER_ID, userId);
             assertEquals(USER_NAME, userName);
+            assertEquals(USER_ROLE, userRole);
         }
 
         @Test

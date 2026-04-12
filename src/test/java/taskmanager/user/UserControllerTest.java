@@ -142,7 +142,7 @@ public class UserControllerTest extends BaseControllerTest
         }
 
         @Test
-        public void returns403_whenNameInUse() throws Exception
+        public void returns409_whenNameInUse() throws Exception
         {
             //GIVEN
             String json = """
@@ -177,7 +177,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenUserExists() throws Exception
         {
             //GIVEN
-            when(userService.getUser(OTHER_USER_ID, USER_ID)).thenReturn(otherUserResponse());
+            when(userService.getUser(OTHER_USER_ID, authenticatedUser())).thenReturn(otherUserResponse());
 
             //WHEN
             mockMvc.perform(get("/users/" + OTHER_USER_ID))
@@ -188,7 +188,7 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.name").value(OTHER_USER_NAME))
                     .andExpect(jsonPath("$.role").value(USER_ROLE.toString()));
 
-            verify(userService, times(1)).getUser(OTHER_USER_ID, USER_ID);
+            verify(userService, times(1)).getUser(OTHER_USER_ID, authenticatedUser());
             verifyNoMoreInteractions(userService);
         }
 
@@ -212,7 +212,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns403_whenNoRights() throws Exception
         {
             //GIVEN
-            when(userService.getUser(OTHER_USER_ID, USER_ID))
+            when(userService.getUser(OTHER_USER_ID, authenticatedUser()))
                     .thenThrow(ForbiddenAccessException.class);
 
             //WHEN
@@ -223,7 +223,7 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.errorCode").value(FORBIDDEN.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
-            verify(userService, times(1)).getUser(OTHER_USER_ID, USER_ID);
+            verify(userService, times(1)).getUser(OTHER_USER_ID, authenticatedUser());
             verifyNoMoreInteractions(userService);
         }
 
@@ -231,7 +231,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns404_whenUserNotExists() throws Exception
         {
             //GIVEN
-            when(userService.getUser(USER_ID, USER_ID))
+            when(userService.getUser(USER_ID, authenticatedUser()))
                     .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN
@@ -243,7 +243,7 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.resource").value(USER.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
-            verify(userService, times(1)).getUser(USER_ID, USER_ID);
+            verify(userService, times(1)).getUser(USER_ID, authenticatedUser());
             verifyNoMoreInteractions(userService);
         }
     }
@@ -255,7 +255,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
+            when(userService.getUsers(any(UserFilter.class), any(Pageable.class)))
                     .thenReturn(usersResponsePage());
 
             //WHEN
@@ -279,7 +279,7 @@ public class UserControllerTest extends BaseControllerTest
                             containsInAnyOrder(toInt(USER_ID), toInt(OTHER_USER_ID))));
 
             verify(userService, times(1))
-                    .getUsers(any(UserFilter.class), eq(USER_ID), eq(PAGEABLE));
+                    .getUsers(any(UserFilter.class), eq(PAGEABLE));
 
             verifyNoMoreInteractions(userService);
         }
@@ -288,7 +288,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns200_whenNoFilters() throws Exception
         {
             //GIVEN
-            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
+            when(userService.getUsers(any(UserFilter.class), any(Pageable.class)))
                     .thenReturn(usersResponsePage());
 
             //WHEN
@@ -303,7 +303,7 @@ public class UserControllerTest extends BaseControllerTest
                             containsInAnyOrder(toInt(USER_ID), toInt(OTHER_USER_ID))));
 
             verify(userService, times(1))
-                    .getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class));
+                    .getUsers(any(UserFilter.class), any(Pageable.class));
 
             verifyNoMoreInteractions(userService);
         }
@@ -331,7 +331,7 @@ public class UserControllerTest extends BaseControllerTest
         public void returns403_whenNoRights() throws Exception
         {
             //GIVEN
-            when(userService.getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class)))
+            when(userService.getUsers(any(UserFilter.class), any(Pageable.class)))
                     .thenThrow(ForbiddenAccessException.class);
 
             //WHEN
@@ -343,7 +343,7 @@ public class UserControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verify(userService, times(1))
-                    .getUsers(any(UserFilter.class), eq(USER_ID), any(Pageable.class));
+                    .getUsers(any(UserFilter.class), any(Pageable.class));
 
             verifyNoMoreInteractions(userService);
         }

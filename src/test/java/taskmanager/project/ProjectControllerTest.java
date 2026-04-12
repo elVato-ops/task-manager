@@ -40,119 +40,6 @@ public class ProjectControllerTest extends BaseControllerTest
     private TaskService taskService;
 
     @Nested
-    public class GetProjectById
-    {
-        @Test
-        public void returns200_whenExists() throws Exception
-        {
-            //GIVEN
-            when(projectService.getProject(PROJECT_ID)).thenReturn(projectResponse());
-
-            //WHEN
-            mockMvc.perform(get("/projects/" + PROJECT_ID))
-
-            //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(PROJECT_ID))
-                    .andExpect(jsonPath("$.name").value(PROJECT_NAME))
-                    .andExpect(jsonPath("$.ownerId").value(USER_ID));
-
-            verify(projectService, times(1)).getProject(PROJECT_ID);
-            verifyNoMoreInteractions(projectService);
-        }
-
-        @Test
-        public void returns400_whenIdInvalid() throws Exception
-        {
-            //WHEN
-            mockMvc.perform(get("/projects/" + -PROJECT_ID))
-
-            //THEN
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
-                    .andExpect(jsonPath("$.timestamp").exists());
-
-            verifyNoInteractions(projectService);
-        }
-
-        @Test
-        public void returns404_whenNotExists() throws Exception
-        {
-            //GIVEN
-            when(projectService.getProject(PROJECT_ID))
-                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
-
-            //WHEN
-            mockMvc.perform(get("/projects/" + PROJECT_ID))
-
-                    //THEN
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
-                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
-                    .andExpect(jsonPath("$.timestamp").exists());
-
-            verify(projectService, times(1)).getProject(PROJECT_ID);
-            verifyNoMoreInteractions(projectService);
-        }
-    }
-
-    @Nested
-    public class GetAllProjects
-    {
-        @Test
-        public void returns200_whenRequestValid() throws Exception
-        {
-            //GIVEN
-            when(projectService.getProjects(any(ProjectFilter.class), eq(PAGEABLE)))
-                    .thenReturn(projectResponsePage());
-        
-            //WHEN
-            mockMvc.perform(get("/projects")
-                        .param("page", String.valueOf(PAGEABLE.getPageNumber()))
-                        .param("size", String.valueOf(PAGEABLE.getPageSize()))
-                        .param("name", PROJECT_NAME))
-
-            //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.size").value(1))
-                    .andExpect(jsonPath("$.totalElements").value(1))
-                    .andExpect(jsonPath("$.totalPages").value(1))
-                    .andExpect(jsonPath("$.content.length()").value(1))
-                    .andExpect(jsonPath("$.content[0].name").value(PROJECT_NAME))
-                    .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID))
-                    .andExpect(jsonPath("$.content[0].ownerId").value(USER_ID));
-
-            verify(projectService, times(1))
-                    .getProjects(any(ProjectFilter.class), eq(PAGEABLE));
-
-            verifyNoMoreInteractions(projectService);
-        }
-
-        @Test
-        public void returns200_whenNoFilters() throws Exception
-        {
-            //GIVEN
-            when(projectService.getProjects(any(ProjectFilter.class), any(Pageable.class)))
-                    .thenReturn(projectResponsePage());
-
-            //WHEN
-            mockMvc.perform(get("/projects"))
-
-            //THEN
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content.length()").value(1))
-                    .andExpect(jsonPath("$.content[0].name").value(PROJECT_NAME))
-                    .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID))
-                    .andExpect(jsonPath("$.content[0].ownerId").value(USER_ID));
-
-            verify(projectService, times(1))
-                    .getProjects(any(ProjectFilter.class), any(Pageable.class));
-
-            verifyNoMoreInteractions(projectService);
-        }
-    }
-
-    @Nested
     class CreateProject
     {
         @Test
@@ -175,7 +62,7 @@ public class ProjectControllerTest extends BaseControllerTest
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
-            //THEN
+                    //THEN
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", "/projects/" + PROJECT_ID))
                     .andExpect(jsonPath("$.id").value(PROJECT_ID))
@@ -203,12 +90,125 @@ public class ProjectControllerTest extends BaseControllerTest
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
 
+                    //THEN
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+
+            verifyNoInteractions(projectService);
+        }
+    }
+
+    @Nested
+    public class GetAllProjects
+    {
+        @Test
+        public void returns200_whenRequestValid() throws Exception
+        {
+            //GIVEN
+            when(projectService.getProjects(any(ProjectFilter.class), eq(PAGEABLE)))
+                    .thenReturn(projectResponsePage());
+
+            //WHEN
+            mockMvc.perform(get("/projects")
+                            .param("page", String.valueOf(PAGEABLE.getPageNumber()))
+                            .param("size", String.valueOf(PAGEABLE.getPageSize()))
+                            .param("name", PROJECT_NAME))
+
+                    //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.size").value(1))
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andExpect(jsonPath("$.totalPages").value(1))
+                    .andExpect(jsonPath("$.content.length()").value(1))
+                    .andExpect(jsonPath("$.content[0].name").value(PROJECT_NAME))
+                    .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID))
+                    .andExpect(jsonPath("$.content[0].ownerId").value(USER_ID));
+
+            verify(projectService, times(1))
+                    .getProjects(any(ProjectFilter.class), eq(PAGEABLE));
+
+            verifyNoMoreInteractions(projectService);
+        }
+
+        @Test
+        public void returns200_whenNoFilters() throws Exception
+        {
+            //GIVEN
+            when(projectService.getProjects(any(ProjectFilter.class), any(Pageable.class)))
+                    .thenReturn(projectResponsePage());
+
+            //WHEN
+            mockMvc.perform(get("/projects"))
+
+                    //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content.length()").value(1))
+                    .andExpect(jsonPath("$.content[0].name").value(PROJECT_NAME))
+                    .andExpect(jsonPath("$.content[0].id").value(PROJECT_ID))
+                    .andExpect(jsonPath("$.content[0].ownerId").value(USER_ID));
+
+            verify(projectService, times(1))
+                    .getProjects(any(ProjectFilter.class), any(Pageable.class));
+
+            verifyNoMoreInteractions(projectService);
+        }
+    }
+
+    @Nested
+    public class GetProjectById
+    {
+        @Test
+        public void returns200_whenExists() throws Exception
+        {
+            //GIVEN
+            when(projectService.getProject(PROJECT_ID, authenticatedUser())).thenReturn(projectResponse());
+
+            //WHEN
+            mockMvc.perform(get("/projects/" + PROJECT_ID))
+
+            //THEN
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(PROJECT_ID))
+                    .andExpect(jsonPath("$.name").value(PROJECT_NAME))
+                    .andExpect(jsonPath("$.ownerId").value(USER_ID));
+
+            verify(projectService, times(1)).getProject(PROJECT_ID, authenticatedUser());
+            verifyNoMoreInteractions(projectService);
+        }
+
+        @Test
+        public void returns400_whenIdInvalid() throws Exception
+        {
+            //WHEN
+            mockMvc.perform(get("/projects/" + -PROJECT_ID))
+
             //THEN
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errorCode").value(REQUEST_INVALID.toString()))
                     .andExpect(jsonPath("$.timestamp").exists());
 
             verifyNoInteractions(projectService);
+        }
+
+        @Test
+        public void returns404_whenNotExists() throws Exception
+        {
+            //GIVEN
+            when(projectService.getProject(PROJECT_ID, authenticatedUser()))
+                    .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
+
+            //WHEN
+            mockMvc.perform(get("/projects/" + PROJECT_ID))
+
+                    //THEN
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.errorCode").value(NOT_FOUND.toString()))
+                    .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+
+            verify(projectService, times(1)).getProject(PROJECT_ID, authenticatedUser());
+            verifyNoMoreInteractions(projectService);
         }
     }
 
@@ -224,7 +224,7 @@ public class ProjectControllerTest extends BaseControllerTest
               "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(authenticatedUser())))
                     .thenReturn(taskResponse());
 
             ArgumentCaptor<CreateTaskRequest> captor =
@@ -244,7 +244,7 @@ public class ProjectControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.projectId").value(PROJECT_ID))
                     .andExpect(jsonPath("$.assigneeId").value(USER_ID));
 
-            verify(taskService, times(1)).createTask(captor.capture(), eq(PROJECT_ID), eq(USER_ID));
+            verify(taskService, times(1)).createTask(captor.capture(), eq(PROJECT_ID), eq(authenticatedUser()));
             verifyNoMoreInteractions(taskService);
 
             CreateTaskRequest task = captor.getValue();
@@ -282,7 +282,7 @@ public class ProjectControllerTest extends BaseControllerTest
               "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(authenticatedUser())))
                     .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN
@@ -307,7 +307,7 @@ public class ProjectControllerTest extends BaseControllerTest
               "name": "Some task"
             }""";
 
-            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(USER_ID)))
+            when(taskService.createTask(any(CreateTaskRequest.class), eq(PROJECT_ID), eq(authenticatedUser())))
                     .thenThrow(new NotFoundException(USER_ID, USER));
 
             //WHEN
@@ -331,7 +331,7 @@ public class ProjectControllerTest extends BaseControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(taskService.getTasks(eq(PROJECT_ID), any(Pageable.class)))
+            when(taskService.getTasks(eq(PROJECT_ID), eq(authenticatedUser()), any(Pageable.class)))
                     .thenReturn(taskResponsePage());
 
             //WHEN
@@ -351,7 +351,7 @@ public class ProjectControllerTest extends BaseControllerTest
                         .andExpect(jsonPath("$.content[0].projectId").value(PROJECT_ID))
                         .andExpect(jsonPath("$.content[0].status").value(TASK_STATUS.toString()));
 
-            verify(taskService, times(1)).getTasks(eq(PROJECT_ID), any(Pageable.class));
+            verify(taskService, times(1)).getTasks(eq(PROJECT_ID), eq(authenticatedUser()), any(Pageable.class));
             verifyNoMoreInteractions(taskService);
         }
 
@@ -375,7 +375,7 @@ public class ProjectControllerTest extends BaseControllerTest
         public void returns404_whenProjectNotExists() throws Exception
         {
             //GIVEN
-            when(taskService.getTasks(eq(PROJECT_ID), any(Pageable.class)))
+            when(taskService.getTasks(eq(PROJECT_ID), eq(authenticatedUser()), any(Pageable.class)))
                     .thenThrow(new NotFoundException(PROJECT_ID, PROJECT));
 
             //WHEN
@@ -388,7 +388,7 @@ public class ProjectControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.resource").value(PROJECT.toString()))
                     .andExpect(jsonPath("$.message").value("PROJECT with id " + PROJECT_ID + " not found"));
 
-            verify(taskService, times(1)).getTasks(eq(PROJECT_ID), any(Pageable.class));
+            verify(taskService, times(1)).getTasks(eq(PROJECT_ID), eq(authenticatedUser()), any(Pageable.class));
             verifyNoMoreInteractions(taskService);
         }
     }

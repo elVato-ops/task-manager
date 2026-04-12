@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.auth.dto.LoginRequest;
 import taskmanager.auth.dto.LoginResponse;
 import taskmanager.project.Project;
@@ -37,6 +38,7 @@ public class TestConstants
 
     public static final long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
+    public static final Long ADMIN_ID = 3521L;
     public static final Long PROJECT_ID = 93L;
     public static final Long TASK_ID = 46L;
     public static final long EXPIRATION = 86400000;
@@ -48,6 +50,16 @@ public class TestConstants
     public static final Pageable PAGEABLE = PageRequest.of(0, 10);
 
     public static final String INSTANT_STRING = "2024-01-15T10:30:00Z";
+
+    public static AuthenticatedUser authenticatedUser()
+    {
+        return new AuthenticatedUser(USER_ID, false);
+    }
+
+    public static AuthenticatedUser otherAuthenticatedUser()
+    {
+        return new AuthenticatedUser(OTHER_USER_ID, false);
+    }
 
     @SneakyThrows
     public static Project project()

@@ -6,10 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NotFoundException;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.user.UserFinder;
+import taskmanager.utils.AccessGuard;
 import taskmanager.utils.ProjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,6 +36,9 @@ public class ProjectServiceTest
 
     @Mock
     private UserFinder userFinder;
+
+    @Mock
+    private AccessGuard accessGuard;
 
     @Spy
     private ProjectMapper projectMapper;
@@ -95,15 +100,40 @@ public class ProjectServiceTest
                     .thenReturn(project());
 
             //WHEN
-            ProjectResponse response = projectService.getProject(PROJECT_ID);
+            ProjectResponse response = projectService.getProject(PROJECT_ID, authenticatedUser());
 
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
+            verify(accessGuard, times(1))
+                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(project().getId(), response.id());
             assertEquals(project().getName(), response.name());
             assertEquals(project().getOwner().getId(), response.ownerId());
+        }
+
+        @Test
+        public void throwsForbiddenAccessException_whenNoRights()
+        {
+            //GIVEN
+            when(projectFinder.getProject(PROJECT_ID))
+                    .thenReturn(project());
+
+            doThrow(ForbiddenAccessException.class)
+                    .when(accessGuard).verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+
+            //WHEN
+            assertThrows(ForbiddenAccessException.class,
+                    () -> projectService.getProject(PROJECT_ID, authenticatedUser()));
+
+            //THEN
+            verify(accessGuard, times(1))
+                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+            verifyNoMoreInteractions(accessGuard);
+            verify(projectFinder, times(1)).getProject(PROJECT_ID);
+            verifyNoMoreInteractions(projectFinder);
         }
 
         @Test
@@ -115,10 +145,11 @@ public class ProjectServiceTest
 
             //WHEN /THEN
             NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> projectService.getProject(PROJECT_ID));
+                    () -> projectService.getProject(PROJECT_ID, authenticatedUser()));
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
+            verifyNoInteractions(accessGuard);
 
             assertEquals(project().getId(), exception.getId());
             assertEquals(PROJECT, exception.getResource());

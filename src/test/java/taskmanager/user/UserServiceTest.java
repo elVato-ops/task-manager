@@ -10,11 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import taskmanager.auth.AuthService;
 import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NameInUseException;
+import taskmanager.exception.ValidationException;
+import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
+import taskmanager.utils.AccessGuard;
 import taskmanager.utils.UserMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
+import static taskmanager.exception.ResourceType.USER;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest
@@ -36,7 +39,7 @@ public class UserServiceTest
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private AuthService authService;
+    private AccessGuard accessGuard;
 
     private UserService userService;
 
@@ -44,7 +47,7 @@ public class UserServiceTest
     void setUp()
     {
         UserMapper userMapper = new UserMapper(passwordEncoder);
-        userService = new UserService(userRepository, userFinder, authService, userMapper);
+        userService = new UserService(userRepository, userFinder, userMapper, accessGuard);
     }
 
     @Nested
@@ -69,12 +72,29 @@ public class UserServiceTest
             User user = captor.getValue();
             assertEquals(createUserRequest().name(), user.getName());
             assertEquals("encoded-password", user.getPassword());
-
             assertEquals(createUserRequest().name(), userResponse.name());
         }
 
         @Test
-        public void throws409_whenNameInUse()
+        public void throwsValidationException_whenDataInvalid()
+        {
+            //GIVEN
+            CreateUserRequest createUserRequest = new CreateUserRequest("", PASSWORD, UserRole.USER);
+
+            when(userFinder.existsByName("")).thenReturn(false);
+            when(passwordEncoder.encode(any())).thenReturn("encoded-password");
+
+            //WHEN
+            ValidationException exception = assertThrows(ValidationException.class,
+                    () -> userService.createUser(createUserRequest));
+
+            //THEN
+            assertEquals(USER, exception.getResource());
+            verifyNoInteractions(userRepository);
+        }
+
+        @Test
+        public void throwsNameInUseException_whenNameInUse()
         {
             //GIVEN
             when(userFinder.existsByName(USER_NAME))
@@ -104,17 +124,11 @@ public class UserServiceTest
                     .thenReturn(usersPage());
 
             //WHEN
-            Page<UserResponse> users = userService.getUsers(filter, USER_ID, PAGEABLE);
+            Page<UserResponse> users = userService.getUsers(filter, PAGEABLE);
 
             //THEN
-            verify(authService, times(1))
-                    .verifyAdminRole(USER_ID);
-
-            verifyNoMoreInteractions(authService);
-
             verify(userFinder, times(1))
                     .getUsers(ArgumentMatchers.any(), eq(PAGEABLE));
-
             verifyNoMoreInteractions(userFinder);
 
             assertEquals(1, users.getTotalElements());
@@ -122,27 +136,6 @@ public class UserServiceTest
             UserResponse userResponse = users.get().toList().get(0);
             assertEquals(user().getId(), userResponse.id());
             assertEquals(user().getName(), userResponse.name());
-        }
-
-        @Test
-        public void throwsForbiddenAccessException_whenUserHasNoRights()
-        {
-            //GIVEN
-            UserFilter filter = UserFilter.builder().build();
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(authService).verifyAdminRole(USER_ID);
-
-            //WHEN
-            assertThrows(ForbiddenAccessException.class,
-                    () -> userService.getUsers(filter, USER_ID, PAGEABLE));
-
-            //THEN
-            verify(authService, times(1))
-                    .verifyAdminRole(USER_ID);
-
-            verifyNoMoreInteractions(authService);
-            verifyNoInteractions(userFinder);
         }
     }
 
@@ -157,7 +150,7 @@ public class UserServiceTest
                     .thenReturn(user());
 
             //WHEN
-            UserResponse userResponse = userService.getUser(USER_ID, OTHER_USER_ID);
+            UserResponse userResponse = userService.getUser(USER_ID, authenticatedUser());
 
             //THEN
             verify(userFinder, times(1))
@@ -165,32 +158,35 @@ public class UserServiceTest
 
             verifyNoMoreInteractions(userFinder);
 
-            verify(authService, times(1))
-                    .verifyAdminRole(OTHER_USER_ID);
-
-            verifyNoMoreInteractions(authService);
+            verify(accessGuard, times(1))
+                    .verifyRights(authenticatedUser(), USER_ID, USER, USER_ID);
+            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(user().getId(), userResponse.id());
             assertEquals(user().getName(), userResponse.name());
         }
 
         @Test
-        public void throwsForbiddenAccessException_whenUserHasNoRights()
+        public void throwsForbiddenAccessException_whenNoRights()
         {
             //GIVEN
-            doThrow(ForbiddenAccessException.class)
-                    .when(authService).verifyAdminRole(OTHER_USER_ID);
+            doThrow(new ForbiddenAccessException(otherAuthenticatedUser().id(), USER, USER_ID))
+                    .when(accessGuard).verifyRights(otherAuthenticatedUser(), USER_ID, USER, USER_ID);
 
             //WHEN
-            assertThrows(ForbiddenAccessException.class,
-                    () -> userService.getUser(USER_ID, OTHER_USER_ID));
+            ForbiddenAccessException exception = assertThrows(ForbiddenAccessException.class,
+                    () -> userService.getUser(USER_ID, otherAuthenticatedUser()));
 
             //THEN
-            verify(authService, times(1))
-                    .verifyAdminRole(OTHER_USER_ID);
-
-            verifyNoMoreInteractions(authService);
             verifyNoInteractions(userFinder);
+
+            verify(accessGuard, times(1))
+                    .verifyRights(otherAuthenticatedUser(), USER_ID, USER, USER_ID);
+            verifyNoMoreInteractions(accessGuard);
+
+            assertEquals(otherAuthenticatedUser().id(), exception.getRequesterId());
+            assertEquals(USER, exception.getResourceType());
+            assertEquals(USER_ID, exception.getResourceId());
         }
     }
 }

@@ -6,11 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import taskmanager.auth.dto.LoginRequest;
 import taskmanager.auth.dto.LoginResponse;
-import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.user.User;
 import taskmanager.user.UserRepository;
-
-import static taskmanager.user.UserRole.ADMIN;
 
 @Service
 @RequiredArgsConstructor
@@ -30,15 +27,7 @@ public class AuthService
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        String token = jwtUtils.generateToken(user.getId(), user.getName());
+        String token = jwtUtils.generateToken(user.getId(), user.getName(), user.getRole());
         return new LoginResponse(token);
-    }
-
-    public void verifyAdminRole(Long userId)
-    {
-        if (!userRepository.existsByIdAndRole(userId, ADMIN))
-        {
-            throw new ForbiddenAccessException("User " + userId + " has no " + ADMIN + " rights");
-        }
     }
 }

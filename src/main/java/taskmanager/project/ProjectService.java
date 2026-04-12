@@ -6,13 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.project.specification.ProjectSpecification;
 import taskmanager.user.User;
 import taskmanager.user.UserFinder;
+import taskmanager.utils.AccessGuard;
 import taskmanager.utils.ProjectMapper;
+
+import static taskmanager.exception.ResourceType.PROJECT;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class ProjectService
     private final ProjectFinder projectFinder;
     private final ProjectMapper projectMapper;
     private final UserFinder userFinder;
+    private final AccessGuard accessGuard;
 
     @Transactional
     public ProjectResponse createProject(CreateProjectRequest request, Long userId)
@@ -34,10 +39,12 @@ public class ProjectService
     }
 
     @Transactional(readOnly = true)
-    public ProjectResponse getProject(Long id)
+    public ProjectResponse getProject(Long id, AuthenticatedUser user)
     {
-        return projectMapper.toResponse(
-                projectFinder.getProject(id));
+        Project project = projectFinder.getProject(id);
+        accessGuard.verifyRights(user, project.getOwner().getId(), PROJECT, project.getId());
+
+        return projectMapper.toResponse(project);
     }
 
     @Transactional(readOnly = true)

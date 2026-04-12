@@ -6,13 +6,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import taskmanager.auth.AuthService;
+import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.exception.NameInUseException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
 import taskmanager.user.specification.UserSpecification;
+import taskmanager.utils.AccessGuard;
 import taskmanager.utils.UserMapper;
+
+import static taskmanager.exception.ResourceType.USER;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +23,8 @@ public class UserService
 {
     private final UserRepository userRepository;
     private final UserFinder userFinder;
-    private final AuthService authService;
     private final UserMapper mapper;
+    private final AccessGuard accessGuard;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request)
@@ -36,10 +39,8 @@ public class UserService
     }
 
     @Transactional(readOnly = true)
-    public Page<UserResponse> getUsers(UserFilter filter, Long currentUserId, Pageable pageable)
+    public Page<UserResponse> getUsers(UserFilter filter, Pageable pageable)
     {
-        authService.verifyAdminRole(currentUserId);
-
         Specification<User> specification = UserSpecification.withFilter(filter);
 
         return userFinder
@@ -48,9 +49,9 @@ public class UserService
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getUser(Long id, Long currentUserId)
+    public UserResponse getUser(Long id, AuthenticatedUser user)
     {
-        authService.verifyAdminRole(currentUserId);
+        accessGuard.verifyRights(user, id, USER, id);
         return mapper.toResponse(userFinder.getUser(id));
     }
 }

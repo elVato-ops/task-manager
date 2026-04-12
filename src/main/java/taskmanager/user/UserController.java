@@ -7,9 +7,11 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.response.PageResponse;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
@@ -26,7 +28,7 @@ public class UserController
 {
     private final UserService userService;
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<UserResponse> createUser(
             @Valid @RequestBody CreateUserRequest request)
     {
@@ -40,28 +42,25 @@ public class UserController
     @GetMapping("/{id}")
     public UserResponse getUserById(
             @PathVariable @Positive Long id,
-            Authentication authentication)
+            @AuthenticationPrincipal AuthenticatedUser user)
     {
-        Long currentUserId = (Long) authentication.getPrincipal();
-        return userService.getUser(id, currentUserId);
+        return userService.getUser(id, user);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<UserResponse> getUsers(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) @Past Instant fromCreationDate,
             @RequestParam(required = false) UserRole userRole,
-            Pageable pageable,
-            Authentication authentication)
+            Pageable pageable)
     {
-        Long userId = (Long) authentication.getPrincipal();
-
         UserFilter filter = UserFilter.builder()
                 .name(name)
                 .fromCreationDate(fromCreationDate)
                 .userRole(userRole)
                 .build();
 
-        return new PageResponse<>(userService.getUsers(filter, userId, pageable));
+        return new PageResponse<>(userService.getUsers(filter, pageable));
     }
 }

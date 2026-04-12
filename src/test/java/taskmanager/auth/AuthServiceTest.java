@@ -42,7 +42,7 @@ public class AuthServiceTest
             //GIVEN
             when(userRepository.findByName(USER_NAME)).thenReturn(Optional.of(user()));
             when(passwordEncoder.matches(PASSWORD, PASSWORD)).thenReturn(true);
-            when(jwtUtils.generateToken(USER_ID, USER_NAME)).thenReturn(TOKEN);
+            when(jwtUtils.generateToken(USER_ID, USER_NAME, USER_ROLE)).thenReturn(TOKEN);
 
             //WHEN
             LoginResponse login = authService.login(loginRequest());
@@ -54,7 +54,7 @@ public class AuthServiceTest
             verify(passwordEncoder, times(1)).matches(PASSWORD, PASSWORD);
             verifyNoMoreInteractions(passwordEncoder);
 
-            verify(jwtUtils, times(1)).generateToken(USER_ID, USER_NAME);
+            verify(jwtUtils, times(1)).generateToken(USER_ID, USER_NAME, USER_ROLE);
             verifyNoMoreInteractions(jwtUtils);
 
             assertEquals(TOKEN, login.token());

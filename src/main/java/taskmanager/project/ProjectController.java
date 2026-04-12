@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
@@ -29,13 +31,12 @@ public class ProjectController
     private final TaskService taskService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER')")
     public ResponseEntity<ProjectResponse> create(
             @Valid @RequestBody CreateProjectRequest request,
-            Authentication authentication)
+            @AuthenticationPrincipal Long currentUserId)
     {
-        Long userId = (Long) authentication.getPrincipal();
-
-        ProjectResponse project = projectService.createProject(request, userId);
+        ProjectResponse project = projectService.createProject(request, currentUserId);
 
         return ResponseEntity
                 .created(URI.create("/projects/" + project.id()))
@@ -43,16 +44,15 @@ public class ProjectController
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<ProjectResponse> getAll(
             @RequestParam(required = false) String name,
-            Pageable pageable,
-            Authentication authentication)
+            @RequestParam(required = false) Long ownerId,
+            Pageable pageable)
     {
-        Long userId = (Long) authentication.getPrincipal();
-
         ProjectFilter filter = ProjectFilter.builder()
                 .name(name)
-                .ownerId(userId)
+                .ownerId(ownerId)
                 .build();
 
         return new PageResponse<>(projectService.getProjects(filter, pageable));
@@ -60,20 +60,20 @@ public class ProjectController
 
     @GetMapping("{id}")
     public ProjectResponse getById(
-            @PathVariable @Positive Long id)
+            @PathVariable @Positive Long id,
+            @AuthenticationPrincipal AuthenticatedUser user)
     {
-        return projectService.getProject(id);
+        return projectService.getProject(id, user);
     }
 
     @PostMapping("{id}/tasks")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER')")
     public ResponseEntity<TaskResponse> createTask(
             @PathVariable @Positive Long id,
             @Valid @RequestBody CreateTaskRequest request,
-            Authentication authentication)
+            @AuthenticationPrincipal AuthenticatedUser user)
     {
-        Long userId = (Long) authentication.getPrincipal();
-
-        TaskResponse task = taskService.createTask(request, id, userId);
+        TaskResponse task = taskService.createTask(request, id, user);
 
         return ResponseEntity
                 .created(URI.create("/projects/" + id + "/tasks/" + task.id()))
@@ -83,9 +83,10 @@ public class ProjectController
     @GetMapping("{id}/tasks")
     public PageResponse<TaskResponse> getTasks(
             @PathVariable @Positive Long id,
+            @AuthenticationPrincipal AuthenticatedUser user,
             Pageable pageable)
     {
-        Page<TaskResponse> page = taskService.getTasks(id, pageable);
+        Page<TaskResponse> page = taskService.getTasks(id, user, pageable);
         return new PageResponse<>(page);
     }
 }

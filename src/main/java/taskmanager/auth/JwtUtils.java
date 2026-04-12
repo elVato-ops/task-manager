@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import taskmanager.user.UserRole;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -20,11 +21,12 @@ public class JwtUtils
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(Long userId, String username)
+    public String generateToken(Long userId, String username, UserRole role)
     {
         return Jwts.builder()
                 .subject(username)
                 .claim("userId", userId)
+                .claim("role", role.toString())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -39,6 +41,12 @@ public class JwtUtils
     public Long extractUserId(String token)
     {
         return getClaims(token).get("userId", Long.class);
+    }
+
+    public UserRole extractUserRole(String token)
+    {
+        String role = getClaims(token).get("role", String.class);
+        return UserRole.valueOf(role);
     }
 
     public boolean isTokenValid(String token)

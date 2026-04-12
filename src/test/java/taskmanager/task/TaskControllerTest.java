@@ -7,6 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import taskmanager.BaseControllerTest;
+import taskmanager.auth.dto.AuthenticatedUser;
+import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NotFoundException;
 import taskmanager.task.filter.TaskFilter;
 import taskmanager.utils.WithMockUserId;
@@ -18,8 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static taskmanager.TestConstants.*;
-import static taskmanager.exception.ErrorCode.NOT_FOUND;
-import static taskmanager.exception.ErrorCode.REQUEST_INVALID;
+import static taskmanager.exception.ErrorCode.*;
 import static taskmanager.exception.ResourceType.TASK;
 import static taskmanager.task.TaskStatus.IN_PROGRESS;
 
@@ -37,7 +38,7 @@ public class TaskControllerTest extends BaseControllerTest
         public void returns200_whenRequestValid() throws Exception
         {
             //GIVEN
-            when(taskService.getTasks(any(TaskFilter.class), any(Pageable.class)))
+            when(taskService.getTasks(any(TaskFilter.class), any(AuthenticatedUser.class), any(Pageable.class)))
                     .thenReturn(taskResponsePage());
 
             //WHEN
@@ -62,7 +63,7 @@ public class TaskControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.content[0].projectId").value(PROJECT_ID))
                     .andExpect(jsonPath("$.content[0].assigneeId").value(USER_ID));
 
-            verify(taskService, times(1)).getTasks(any(TaskFilter.class), any(Pageable.class));
+            verify(taskService, times(1)).getTasks(any(TaskFilter.class), any(AuthenticatedUser.class), any(Pageable.class));
             verifyNoMoreInteractions(taskService);
         }
 
@@ -70,7 +71,7 @@ public class TaskControllerTest extends BaseControllerTest
         public void returns200_whenNoFilters() throws Exception
         {
             //GIVEN
-            when(taskService.getTasks(any(TaskFilter.class), any(Pageable.class)))
+            when(taskService.getTasks(any(TaskFilter.class), any(AuthenticatedUser.class), any(Pageable.class)))
                     .thenReturn(taskResponsePage());
 
             //WHEN
@@ -92,7 +93,7 @@ public class TaskControllerTest extends BaseControllerTest
                     .andExpect(jsonPath("$.content[0].projectId").value(PROJECT_ID))
                     .andExpect(jsonPath("$.content[0].assigneeId").value(USER_ID));
 
-            verify(taskService, times(1)).getTasks(any(TaskFilter.class), any(Pageable.class));
+            verify(taskService, times(1)).getTasks(any(TaskFilter.class), any(AuthenticatedUser.class), any(Pageable.class));
             verifyNoMoreInteractions(taskService);
         }
 
@@ -134,7 +135,7 @@ public class TaskControllerTest extends BaseControllerTest
         public void returns200_whenSuccess() throws Exception
         {
             //GIVEN
-            when(taskService.updateStatus(TASK_ID, NEW_TASK_STATUS))
+            when(taskService.updateStatus(eq(TASK_ID), eq(NEW_TASK_STATUS), any(AuthenticatedUser.class)))
                     .thenReturn(updatedTaskResponse());
 
             //WHEN
@@ -162,10 +163,26 @@ public class TaskControllerTest extends BaseControllerTest
         }
 
         @Test
+        public void returns403_whenNoRights() throws Exception
+        {
+            //GIVEN
+            when(taskService.updateStatus(eq(TASK_ID), eq(NEW_TASK_STATUS), any(AuthenticatedUser.class)))
+                    .thenThrow(ForbiddenAccessException.class);
+
+            //WHEN
+            mockMvc.perform(patch("/tasks/" + TASK_ID + "/status/" + IN_PROGRESS))
+
+            //THEN
+                    .andExpect(jsonPath("$.errorCode").value(FORBIDDEN.toString()))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+
+        @Test
         public void returns404_whenTaskNotExists() throws Exception
         {
             //GIVEN
-            when(taskService.updateStatus(TASK_ID, NEW_TASK_STATUS))
+            when(taskService.updateStatus(eq(TASK_ID), eq(NEW_TASK_STATUS), any(AuthenticatedUser.class)))
                     .thenThrow(new NotFoundException(TASK_ID, TASK));
 
             //WHEN
