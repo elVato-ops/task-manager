@@ -11,12 +11,12 @@ public class AccessGuard
     public void verifyRights(AuthenticatedUser user,
                              Long ownerId,
                              ResourceType resourceType,
-                             Long resourceIds)
+                             Long resourceId)
     {
         Long requesterId = user.id();
         if (!user.isAdmin() && !requesterId.equals(ownerId))
         {
-            throw new ForbiddenAccessException(requesterId, resourceType, resourceIds);
+            throw new ForbiddenAccessException(requesterId, resourceType, resourceId);
         }
     }
 }

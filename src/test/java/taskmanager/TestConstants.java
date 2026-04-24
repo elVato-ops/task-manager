@@ -38,7 +38,6 @@ public class TestConstants
 
     public static final long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
-    public static final Long ADMIN_ID = 3521L;
     public static final Long PROJECT_ID = 93L;
     public static final Long TASK_ID = 46L;
     public static final long EXPIRATION = 86400000;
@@ -59,6 +58,11 @@ public class TestConstants
     public static AuthenticatedUser otherAuthenticatedUser()
     {
         return new AuthenticatedUser(OTHER_USER_ID, false);
+    }
+
+    public static AuthenticatedUser authenticatedAdmin()
+    {
+        return new AuthenticatedUser(OTHER_USER_ID, true);
     }
 
     @SneakyThrows
