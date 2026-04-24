@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import taskmanager.exception.ForbiddenAccessException;
@@ -53,7 +54,6 @@ public class UserServiceTest
         public void returnsUser_whenSuccess()
         {
             //GIVEN
-            when(userFinder.existsByName(USER_NAME)).thenReturn(false);
             when(userRepository.save(any(User.class))).thenReturn(user());
             when(passwordEncoder.encode(any())).thenReturn("encoded-password");
             ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -63,6 +63,7 @@ public class UserServiceTest
 
             //THEN
             verify(userRepository, times(1)).save(captor.capture());
+            verify(userRepository, times(1)).flush();
             verifyNoMoreInteractions(userRepository);
 
             User user = captor.getValue();
@@ -76,8 +77,6 @@ public class UserServiceTest
         {
             //GIVEN
             CreateUserRequest createUserRequest = new CreateUserRequest("", PASSWORD, UserRole.USER);
-
-            when(userFinder.existsByName("")).thenReturn(false);
             when(passwordEncoder.encode(any())).thenReturn("encoded-password");
 
             //WHEN
@@ -93,17 +92,17 @@ public class UserServiceTest
         public void throwsNameInUseException_whenNameInUse()
         {
             //GIVEN
-            when(userFinder.existsByName(USER_NAME))
-                    .thenReturn(true);
+            doThrow(DataIntegrityViolationException.class)
+                    .when(userRepository).save(any(User.class));
+
+            when(passwordEncoder.encode(any())).thenReturn("encoded-password");
 
             //WHEN
             assertThrows(NameInUseException.class,
                     () -> userService.createUser(createUserRequest()));
 
             //THEN
-            verify(userFinder, times(1)).existsByName(USER_NAME);
-            verifyNoMoreInteractions(userFinder);
-            verifyNoInteractions(userRepository);
+            verify(userRepository, times(1)).save(any(User.class));
         }
     }
 

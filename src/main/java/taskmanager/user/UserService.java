@@ -1,6 +1,7 @@
 package taskmanager.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,12 +29,17 @@ public class UserService
     @Transactional
     public UserResponse createUser(CreateUserRequest request)
     {
-        if (userFinder.existsByName(request.name()))
+        User user;
+        try
+        {
+            user = userRepository.save(mapper.toEntity(request));
+            userRepository.flush();
+        }
+        catch (DataIntegrityViolationException e)
         {
             throw new NameInUseException(request.name());
         }
 
-        User user = userRepository.save(mapper.toEntity(request));
         return mapper.toResponse(user);
     }
 

@@ -70,7 +70,7 @@ public class TaskManagerIntegrationTest extends BaseIntegrationTest
         public void returns403_whenNoAccess() throws Exception
         {
             //WHEN
-            getUser(USER_ID)
+            getUser(OTHER_USER_ID)
 
             //THEN
                     .andExpect(status().isForbidden())
