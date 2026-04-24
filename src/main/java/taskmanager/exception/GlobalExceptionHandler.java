@@ -47,7 +47,7 @@ public class GlobalExceptionHandler
 
     @ExceptionHandler(NameInUseException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleForbiddenAccessException(NameInUseException e)
+    public ErrorResponse handleNameInUseExceptionException(NameInUseException e)
     {
         return response(e.getMessage(), null, USERNAME_CONFLICT);
     }

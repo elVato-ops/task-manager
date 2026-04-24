@@ -10,9 +10,8 @@ import taskmanager.exception.ForbiddenAccessException;
 import taskmanager.exception.NotFoundException;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
+import taskmanager.project.mapper.ProjectMapper;
 import taskmanager.user.UserFinder;
-import taskmanager.utils.AccessGuard;
-import taskmanager.utils.ProjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,9 +35,6 @@ public class ProjectServiceTest
 
     @Mock
     private UserFinder userFinder;
-
-    @Mock
-    private AccessGuard accessGuard;
 
     @Spy
     private ProjectMapper projectMapper;
@@ -105,9 +101,6 @@ public class ProjectServiceTest
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(project().getId(), response.id());
             assertEquals(project().getName(), response.name());
@@ -119,19 +112,13 @@ public class ProjectServiceTest
         {
             //GIVEN
             when(projectFinder.getProject(PROJECT_ID))
-                    .thenReturn(project());
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(accessGuard).verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+                    .thenReturn(otherProject());
 
             //WHEN
             assertThrows(ForbiddenAccessException.class,
                     () -> projectService.getProject(PROJECT_ID, authenticatedUser()));
 
             //THEN
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
         }
@@ -149,7 +136,6 @@ public class ProjectServiceTest
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
-            verifyNoInteractions(accessGuard);
 
             assertEquals(project().getId(), exception.getId());
             assertEquals(PROJECT, exception.getResource());

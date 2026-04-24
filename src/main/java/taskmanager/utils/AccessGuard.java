@@ -8,7 +8,7 @@ import taskmanager.exception.ResourceType;
 @Component
 public class AccessGuard
 {
-    public void verifyRights(AuthenticatedUser user,
+    public static void verifyRights(AuthenticatedUser user,
                              Long ownerId,
                              ResourceType resourceType,
                              Long resourceId)

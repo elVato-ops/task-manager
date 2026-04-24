@@ -16,8 +16,7 @@ import taskmanager.exception.ValidationException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
-import taskmanager.utils.AccessGuard;
-import taskmanager.utils.UserMapper;
+import taskmanager.user.mapper.UserMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,16 +37,13 @@ public class UserServiceTest
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AccessGuard accessGuard;
-
     private UserService userService;
 
     @BeforeEach
     void setUp()
     {
         UserMapper userMapper = new UserMapper(passwordEncoder);
-        userService = new UserService(userRepository, userFinder, userMapper, accessGuard);
+        userService = new UserService(userRepository, userFinder, userMapper);
     }
 
     @Nested
@@ -158,10 +154,6 @@ public class UserServiceTest
 
             verifyNoMoreInteractions(userFinder);
 
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, USER, USER_ID);
-            verifyNoMoreInteractions(accessGuard);
-
             assertEquals(user().getId(), userResponse.id());
             assertEquals(user().getName(), userResponse.name());
         }
@@ -170,8 +162,8 @@ public class UserServiceTest
         public void throwsForbiddenAccessException_whenNoRights()
         {
             //GIVEN
-            doThrow(new ForbiddenAccessException(otherAuthenticatedUser().id(), USER, USER_ID))
-                    .when(accessGuard).verifyRights(otherAuthenticatedUser(), USER_ID, USER, USER_ID);
+//            doThrow(new ForbiddenAccessException(otherAuthenticatedUser().id(), USER, USER_ID))
+//                    .when(accessGuard).verifyRights(otherAuthenticatedUser(), USER_ID, USER, USER_ID);
 
             //WHEN
             ForbiddenAccessException exception = assertThrows(ForbiddenAccessException.class,
@@ -179,10 +171,6 @@ public class UserServiceTest
 
             //THEN
             verifyNoInteractions(userFinder);
-
-            verify(accessGuard, times(1))
-                    .verifyRights(otherAuthenticatedUser(), USER_ID, USER, USER_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(otherAuthenticatedUser().id(), exception.getRequesterId());
             assertEquals(USER, exception.getResourceType());

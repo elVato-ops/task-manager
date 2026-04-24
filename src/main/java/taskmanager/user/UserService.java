@@ -11,11 +11,11 @@ import taskmanager.exception.NameInUseException;
 import taskmanager.user.dto.CreateUserRequest;
 import taskmanager.user.dto.UserResponse;
 import taskmanager.user.filter.UserFilter;
+import taskmanager.user.mapper.UserMapper;
 import taskmanager.user.specification.UserSpecification;
-import taskmanager.utils.AccessGuard;
-import taskmanager.utils.UserMapper;
 
 import static taskmanager.exception.ResourceType.USER;
+import static taskmanager.utils.AccessGuard.verifyRights;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +24,6 @@ public class UserService
     private final UserRepository userRepository;
     private final UserFinder userFinder;
     private final UserMapper mapper;
-    private final AccessGuard accessGuard;
 
     @Transactional
     public UserResponse createUser(CreateUserRequest request)
@@ -51,7 +50,7 @@ public class UserService
     @Transactional(readOnly = true)
     public UserResponse getUser(Long id, AuthenticatedUser user)
     {
-        accessGuard.verifyRights(user, id, USER, id);
+        verifyRights(user, id, USER, id);
         return mapper.toResponse(userFinder.getUser(id));
     }
 }

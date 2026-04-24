@@ -1,4 +1,4 @@
-package taskmanager.utils;
+package taskmanager.user.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

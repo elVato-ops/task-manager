@@ -13,9 +13,8 @@ import taskmanager.exception.ValidationException;
 import taskmanager.project.ProjectFinder;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.task.filter.TaskFilter;
+import taskmanager.task.mapper.TaskMapper;
 import taskmanager.user.UserFinder;
-import taskmanager.utils.AccessGuard;
-import taskmanager.utils.TaskMapper;
 
 import java.util.Optional;
 
@@ -24,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static taskmanager.TestConstants.*;
-import static taskmanager.exception.ResourceType.*;
+import static taskmanager.exception.ResourceType.PROJECT;
+import static taskmanager.exception.ResourceType.USER;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskServiceTest
@@ -40,9 +40,6 @@ public class TaskServiceTest
 
     @Mock
     private ProjectFinder projectFinder;
-
-    @Mock
-    private AccessGuard accessGuard;
 
     @Spy
     private TaskMapper taskMapper;
@@ -75,9 +72,6 @@ public class TaskServiceTest
             verifyNoMoreInteractions(userFinder);
             verify(taskRepository, times(1)).save(captor.capture());
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), project().getOwner().getId(), PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             Task value = captor.getValue();
             assertEquals(TASK_NAME, value.getName());
@@ -117,9 +111,6 @@ public class TaskServiceTest
             verifyNoMoreInteractions(projectFinder);
             verify(taskRepository, times(1)).save(captor.capture());
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), project().getOwner().getId(), PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             Task value = captor.getValue();
             assertEquals(TASK_NAME, value.getName());
@@ -148,7 +139,6 @@ public class TaskServiceTest
             verifyNoMoreInteractions(projectFinder);
             verifyNoInteractions(userFinder);
             verifyNoInteractions(taskRepository);
-            verifyNoMoreInteractions(accessGuard);
         }
 
         @Test
@@ -170,9 +160,6 @@ public class TaskServiceTest
             verify(userFinder, times(1)).getUser(USER_ID);
             verifyNoMoreInteractions(userFinder);
             verifyNoInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), project().getOwner().getId(), PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(USER, notFoundException.getResource());
             assertEquals(USER_ID, notFoundException.getId());
@@ -183,10 +170,7 @@ public class TaskServiceTest
         {
             //GIVEN
             when(projectFinder.getProject(PROJECT_ID))
-                    .thenReturn(project());
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(accessGuard).verifyRights(authenticatedUser(), project().getOwner().getId(), PROJECT, PROJECT_ID);
+                    .thenReturn(otherProject());
 
             //WHEN /THEN
             assertThrows(ForbiddenAccessException.class,
@@ -194,9 +178,6 @@ public class TaskServiceTest
 
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), project().getOwner().getId(), PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
             verifyNoInteractions(userFinder);
             verifyNoInteractions(taskRepository);
         }
@@ -222,9 +203,6 @@ public class TaskServiceTest
             verifyNoMoreInteractions(projectFinder);
             verify(taskRepository, times(1)).findByProjectId(PROJECT_ID, PAGEABLE);
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             TaskResponse task = tasks.get().toList().get(0);
             assertEquals(task().getName(), task.name());
@@ -253,10 +231,7 @@ public class TaskServiceTest
         public void throwsForbiddenAccessException_whenNoRights()
         {
             //GIVEN
-            when(projectFinder.getProject(PROJECT_ID)).thenReturn(project());
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(accessGuard).verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+            when(projectFinder.getProject(PROJECT_ID)).thenReturn(otherProject());
 
             //WHEN
             assertThrows(ForbiddenAccessException.class,
@@ -265,9 +240,6 @@ public class TaskServiceTest
             //THEN
             verify(projectFinder, times(1)).getProject(PROJECT_ID);
             verifyNoMoreInteractions(projectFinder);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
             verifyNoInteractions(taskRepository);
         }
     }
@@ -291,7 +263,6 @@ public class TaskServiceTest
             verify(taskRepository, times(1))
                     .findAll(ArgumentMatchers.<Specification<Task>>any(), eq(PAGEABLE));
             verifyNoMoreInteractions(taskRepository);
-            verifyNoInteractions(accessGuard);
 
             TaskResponse taskResponse = tasks.get().toList().get(0);
             assertEquals(task().getStatus(), taskResponse.status());
@@ -305,20 +276,14 @@ public class TaskServiceTest
         {
             //GIVEN
             TaskFilter filter = TaskFilter.builder()
-                    .assigneeId(USER_ID)
+                    .assigneeId(OTHER_USER_ID)
                     .build();
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(accessGuard).verifyRights(authenticatedUser(), filter.getAssigneeId(), TASK, null);
 
             //WHEN
             assertThrows(ForbiddenAccessException.class,
                     () -> taskService.getTasks(filter, authenticatedUser(), PAGEABLE));
 
             //THEN
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, TASK, null);
-            verifyNoMoreInteractions(accessGuard);
             verifyNoInteractions(taskRepository);
         }
     }
@@ -343,9 +308,6 @@ public class TaskServiceTest
             verify(taskRepository, times(1)).findById(TASK_ID);
             verify(taskRepository, times(1)).save(any(Task.class));
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
 
             assertEquals(updatedTask().getId(), task.id());
             assertEquals(updatedTask().getName(), task.name());
@@ -368,10 +330,6 @@ public class TaskServiceTest
             //THEN
             verify(taskRepository, times(1)).findById(TASK_ID);
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
-
         }
 
         @Test
@@ -388,7 +346,6 @@ public class TaskServiceTest
             //THEN
             verify(taskRepository, times(1)).findById(TASK_ID);
             verifyNoMoreInteractions(taskRepository);
-            verifyNoInteractions(accessGuard);
         }
 
         @Test
@@ -396,10 +353,7 @@ public class TaskServiceTest
         {
             //GIVEN
             when(taskRepository.findById(TASK_ID))
-                    .thenReturn(Optional.of(task()));
-
-            doThrow(ForbiddenAccessException.class)
-                    .when(accessGuard).verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
+                    .thenReturn(Optional.of(otherTask()));
 
             //WHEN
             assertThrows(ForbiddenAccessException.class,
@@ -408,9 +362,6 @@ public class TaskServiceTest
             //THEN
             verify(taskRepository, times(1)).findById(TASK_ID);
             verifyNoMoreInteractions(taskRepository);
-            verify(accessGuard, times(1))
-                    .verifyRights(authenticatedUser(), USER_ID, PROJECT, PROJECT_ID);
-            verifyNoMoreInteractions(accessGuard);
         }
     }
 }

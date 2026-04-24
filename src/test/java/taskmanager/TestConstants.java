@@ -31,6 +31,7 @@ public class TestConstants
     public static final String OTHER_USER_NAME = "Dudek";
     public static final String PASSWORD = "password";
     public static final String PROJECT_NAME = "Some project";
+    public static final String OTHER_PROJECT_NAME = "Another project";
     public static final String TASK_NAME = "Some task";
     public static final String OTHER_TASK_NAME = "Other task";
     public static final String TOKEN = "kosdfnksjdnfkjabnkasjfbjabf";
@@ -39,7 +40,9 @@ public class TestConstants
     public static final long USER_ID = 17L;
     public static final Long OTHER_USER_ID = 37L;
     public static final Long PROJECT_ID = 93L;
+    public static final Long OTHER_PROJECT_ID = 94L;
     public static final Long TASK_ID = 46L;
+    public static final Long OTHER_TASK_ID = 49L;
     public static final long EXPIRATION = 86400000;
 
     public static final TaskStatus TASK_STATUS = TaskStatus.TODO;
@@ -73,6 +76,18 @@ public class TestConstants
         Field field = Project.class.getDeclaredField("id");
         field.setAccessible(true);
         field.set(project, PROJECT_ID);
+
+        return project;
+    }
+
+    @SneakyThrows
+    public static Project otherProject()
+    {
+        Project project = new Project(OTHER_PROJECT_NAME, otherUser());
+
+        Field field = Project.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(project, OTHER_PROJECT_ID);
 
         return project;
     }
@@ -114,6 +129,18 @@ public class TestConstants
         return user;
     }
 
+    @SneakyThrows
+    public static User otherUser()
+    {
+        User user = new User(OTHER_USER_NAME, USER_ROLE, PASSWORD);
+
+        Field field = User.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(user, OTHER_USER_ID);
+
+        return user;
+    }
+
     public static Page<User> usersPage()
     {
         return new PageImpl<>(List.of(user()));
@@ -142,6 +169,18 @@ public class TestConstants
         Field field = Task.class.getDeclaredField("id");
         field.setAccessible(true);
         field.set(task, TASK_ID);
+
+        return task;
+    }
+
+    @SneakyThrows
+    public static Task otherTask()
+    {
+        Task task = new Task(OTHER_TASK_NAME, TASK_STATUS, otherProject(), otherUser());
+
+        Field field = Task.class.getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(task, OTHER_TASK_ID);
 
         return task;
     }

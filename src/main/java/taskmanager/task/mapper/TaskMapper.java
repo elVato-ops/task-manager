@@ -1,4 +1,4 @@
-package taskmanager.utils;
+package taskmanager.task.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

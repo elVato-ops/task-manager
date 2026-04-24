@@ -13,14 +13,14 @@ import taskmanager.project.ProjectFinder;
 import taskmanager.task.dto.CreateTaskRequest;
 import taskmanager.task.dto.TaskResponse;
 import taskmanager.task.filter.TaskFilter;
+import taskmanager.task.mapper.TaskMapper;
 import taskmanager.task.specification.TaskSpecification;
 import taskmanager.user.User;
 import taskmanager.user.UserFinder;
-import taskmanager.utils.AccessGuard;
-import taskmanager.utils.TaskMapper;
 
 import static taskmanager.exception.ResourceType.PROJECT;
 import static taskmanager.exception.ResourceType.TASK;
+import static taskmanager.utils.AccessGuard.verifyRights;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +30,12 @@ public class TaskService
     private final UserFinder userFinder;
     private final ProjectFinder projectFinder;
     private final TaskMapper taskMapper;
-    private final AccessGuard accessGuard;
 
     @Transactional
     public TaskResponse createTask(CreateTaskRequest request, Long projectId, AuthenticatedUser currentUser)
     {
         Project project = projectFinder.getProject(projectId);
-        accessGuard.verifyRights(currentUser, project.getOwner().getId(), PROJECT, projectId);
+        verifyRights(currentUser, project.getOwner().getId(), PROJECT, projectId);
 
         User user = userFinder.getUser(request.assigneeId());
 
@@ -50,7 +49,7 @@ public class TaskService
     {
         if (filter.getAssigneeId() != null)
         {
-            accessGuard.verifyRights(authenticatedUser, filter.getAssigneeId(), TASK, null);
+            verifyRights(authenticatedUser, filter.getAssigneeId(), TASK, null);
         }
 
         Specification<Task> specification = TaskSpecification.withFilter(filter);
@@ -64,7 +63,7 @@ public class TaskService
     public Page<TaskResponse> getTasks(Long projectId, AuthenticatedUser currentUser, Pageable pageable)
     {
         Project project = projectFinder.getProject(projectId);
-        accessGuard.verifyRights(currentUser, project.getOwner().getId(), PROJECT, projectId);
+        verifyRights(currentUser, project.getOwner().getId(), PROJECT, projectId);
 
         return taskRepository.findByProjectId(projectId, pageable)
                         .map(taskMapper::toResponse);
@@ -78,7 +77,7 @@ public class TaskService
 
         Long projectOwnerId = task.getProject().getOwner().getId();
         Long projectId = task.getProject().getId();
-        accessGuard.verifyRights(authenticatedUser, projectOwnerId, PROJECT, projectId);
+        verifyRights(authenticatedUser, projectOwnerId, PROJECT, projectId);
 
         task.updateStatus(status);
 
