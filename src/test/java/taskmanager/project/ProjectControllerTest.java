@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import taskmanager.BaseControllerTest;
 import taskmanager.config.TestSecurityConfig;
 import taskmanager.exception.NotFoundException;
+import taskmanager.export.ProjectExportService;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.filter.ProjectFilter;
 import taskmanager.task.TaskService;
@@ -38,6 +39,9 @@ public class ProjectControllerTest extends BaseControllerTest
 
     @MockBean
     private TaskService taskService;
+
+    @MockBean
+    private ProjectExportService exportService;
 
     @Nested
     class CreateProject

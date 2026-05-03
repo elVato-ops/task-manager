@@ -11,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import taskmanager.auth.dto.AuthenticatedUser;
+import taskmanager.export.ProjectExportResponse;
+import taskmanager.export.ProjectExportService;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
 import taskmanager.project.filter.ProjectFilter;
@@ -29,6 +31,7 @@ public class ProjectController
 {
     private final ProjectService projectService;
     private final TaskService taskService;
+    private final ProjectExportService exportService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PROJECT_MANAGER')")
@@ -88,5 +91,12 @@ public class ProjectController
     {
         Page<TaskResponse> page = taskService.getTasks(id, user, pageable);
         return new PageResponse<>(page);
+    }
+
+    @PostMapping("{id}/export")
+    public ProjectExportResponse exportDataForProject(
+            @PathVariable @Positive Long id)
+    {
+        return exportService.exportData(id);
     }
 }

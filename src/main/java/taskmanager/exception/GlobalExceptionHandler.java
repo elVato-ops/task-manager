@@ -45,7 +45,10 @@ public class GlobalExceptionHandler
         return response(e.getMessage(), null, FORBIDDEN);
     }
 
-    @ExceptionHandler(NameInUseException.class)
+    @ExceptionHandler({
+            NameInUseException.class,
+            ResourceNotAvailableException.class
+    })
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleNameInUseExceptionException(NameInUseException e)
     {

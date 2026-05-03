@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import taskmanager.auth.dto.AuthenticatedUser;
 import taskmanager.auth.dto.LoginRequest;
 import taskmanager.auth.dto.LoginResponse;
+import taskmanager.export.ProjectExportResponse;
 import taskmanager.project.Project;
 import taskmanager.project.dto.CreateProjectRequest;
 import taskmanager.project.dto.ProjectResponse;
@@ -230,5 +231,10 @@ public class TestConstants
     public static LoginRequest loginRequest()
     {
         return new LoginRequest(USER_NAME, PASSWORD);
+    }
+
+    public static ProjectExportResponse projectExportResponse()
+    {
+        return new ProjectExportResponse(PROJECT_ID);
     }
 }
