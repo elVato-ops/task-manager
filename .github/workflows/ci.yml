@@ -15,3 +15,5 @@ jobs:
           cache: maven
       - run: chmod +x mvnw
       - run: ./mvnw -B test
+permissions:
+  contents: read
